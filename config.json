@@ -1,0 +1,23 @@
+{
+  "probabilities": {
+    "jackpot": 0.01,
+    "bigWin": 0.05,
+    "smallWin": 0.15,
+    "lose": 0.79
+  },
+  "winPatterns": {
+    "jackpot": {
+      "message": "🎉 JACKPOT! 🎉",
+      "codePrefix": "JP",
+      "multiplier": 1000,
+      "description": "全て同じ絵柄"
+    },
+    // 他の当選パターン
+  },
+  "symbols": ["🍒", "🍋", "🍊", "🍇", "🔔", "⭐", "💎", "7️⃣"],
+  "gameSettings": {
+    "spinDuration": 2000,
+    "reelStopDelay": 500,
+    "animationSpeed": 20
+  }
+}
