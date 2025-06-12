@@ -4,9 +4,659 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎰 MEGA SLOT 🎰</title>
-    <!-- スタイルとゲームロジックは省略 -->
+    
+    <!-- 動的ベースパスの設定 -->
+    <script>
+        console.log("ページ読み込み開始");
+        // 現在のURLからベースパスを動的に取得
+        window.basePath = window.location.pathname.replace(/\/[^\/]*$/, '/');
+        console.log("ベースパス:", window.basePath);
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e94560 0%, #c70039 100%);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
+
+        .slot-machine {
+            padding: 30px;
+            position: relative;
+        }
+
+        .reels-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .reel {
+            width: 30%;
+            aspect-ratio: 1/1.5;
+            background: #0f0f0f;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .reel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .reel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .reel-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid #e94560;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .reel.win .reel-highlight {
+            opacity: 1;
+            animation: highlight 1s infinite;
+        }
+
+        @keyframes highlight {
+            0% { box-shadow: 0 0 10px #e94560; }
+            50% { box-shadow: 0 0 20px #e94560, 0 0 30px #e94560; }
+            100% { box-shadow: 0 0 10px #e94560; }
+        }
+
+        .symbol {
+            font-size: 1em;
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.1s ease;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, #e94560 0%, #c70039 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.6);
+        }
+
+        .spin-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(233, 69, 96, 0.4);
+        }
+
+        .spin-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
+        }
+
+        .spin-button:hover::before {
+            animation: shine 1.5s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -50%; }
+            100% { left: 150%; }
+        }
+
+        .spin-button:disabled {
+            background: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .spin-button:disabled::before {
+            display: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-message {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .result-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-code {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 10px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease;
+            position: relative;
+        }
+
+        .result-code.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result-code::before {
+            content: '特典コード:';
+            display: block;
+            font-size: 0.7em;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .copy-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .jackpot-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+
+        .jackpot-animation.show {
+            display: block;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.7;
+            animation: confetti-fall 5s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .admin-link {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 0.8em;
+            margin-top: 10px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .admin-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 500px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .reel {
+                font-size: 2.5em;
+            }
+            
+            .spin-button {
+                padding: 12px 30px;
+                font-size: 1.3em;
+            }
+            
+            .result-message {
+                font-size: 1.3em;
+            }
+            
+            .result-code {
+                font-size: 1em;
+            }
+        }
+
+        /* アニメーション */
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-300px); }
+        }
+
+        @keyframes win-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+    
+    <!-- game-manager.jsの読み込み -->
+    <script src="./game-manager.js" defer></script>
 </head>
 <body>
-    <!-- ゲーム画面のHTML構造 -->
+    <div class="container">
+        <div class="header">
+            <h1>🎰 MEGA SLOT 🎰</h1>
+            <p>スピンして特典をゲット！</p>
+        </div>
+        
+        <div class="slot-machine">
+            <div class="reels-container">
+                <div class="reel" id="reel1">
+                    <div class="symbol">🍒</div>
+                    <div class="reel-highlight"></div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="symbol">🍋</div>
+                    <div class="reel-highlight"></div>
+                </div>
+                <div class="reel" id="reel3">
+                    <div class="symbol">🍊</div>
+                    <div class="reel-highlight"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="spin-button" id="spinButton">SPIN</button>
+            </div>
+            
+            <div class="result">
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-code" id="resultCode"></div>
+                <button class="copy-button" id="copyButton" style="display: none;">コピー</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <a href="admin.html" class="admin-link">管理画面</a>
+    </div>
+    
+    <div class="jackpot-animation" id="jackpotAnimation"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM読み込み完了");
+            
+            // ゲームマネージャーの読み込み確認
+            setTimeout(() => {
+                if (typeof gameManager === 'undefined') {
+                    console.error("gameManagerオブジェクトが見つかりません");
+                    // エラー時に画面に表示
+                    document.body.innerHTML += '<div style="color:red;padding:20px;background:white;position:fixed;top:0;left:0;right:0;z-index:9999;">エラー: JavaScriptファイルの読み込みに失敗しました</div>';
+                } else {
+                    console.log("gameManager読み込み成功:", gameManager);
+                    initializeGame();
+                }
+            }, 1000);
+            
+            function initializeGame() {
+                const spinButton = document.getElementById('spinButton');
+                const reels = [
+                    document.getElementById('reel1'),
+                    document.getElementById('reel2'),
+                    document.getElementById('reel3')
+                ];
+                const resultMessage = document.getElementById('resultMessage');
+                const resultCode = document.getElementById('resultCode');
+                const copyButton = document.getElementById('copyButton');
+                const jackpotAnimation = document.getElementById('jackpotAnimation');
+                
+                let isSpinning = false;
+                
+                // シンボルの初期表示
+                updateReels(['🍒', '🍋', '🍊']);
+                
+                // スピンボタンのクリックイベント
+                spinButton.addEventListener('click', () => {
+                    if (isSpinning) return;
+                    
+                    startSpin();
+                });
+                
+                // コピーボタンのクリックイベント
+                copyButton.addEventListener('click', () => {
+                    const codeText = resultCode.textContent;
+                    navigator.clipboard.writeText(codeText)
+                        .then(() => {
+                            copyButton.textContent = 'コピー完了！';
+                            setTimeout(() => {
+                                copyButton.textContent = 'コピー';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('コピーに失敗しました:', err);
+                        });
+                });
+                
+                // スピン開始
+                function startSpin() {
+                    isSpinning = true;
+                    spinButton.disabled = true;
+                    
+                    // 結果をリセット
+                    resultMessage.classList.remove('show');
+                    resultCode.classList.remove('show');
+                    resultMessage.textContent = '';
+                    resultCode.textContent = '';
+                    copyButton.style.display = 'none';
+                    
+                    // リールのハイライトをリセット
+                    reels.forEach(reel => {
+                        reel.classList.remove('win');
+                    });
+                    
+                    // アニメーション用のシンボルを生成
+                    const symbols = gameManager.config ? gameManager.config.symbols : ['🍒', '🍋', '🍊', '🍇', '🔔', '⭐', '💎', '7️⃣'];
+                    
+                    // リールのアニメーション
+                    animateReels(symbols, () => {
+                        // 結果の判定
+                        const result = gameManager.determineResult();
+                        const finalSymbols = gameManager.setResultSymbols(result);
+                        
+                        // 統計の更新
+                        gameManager.updateStatistics(result);
+                        
+                        // 結果の表示
+                        updateReels(finalSymbols);
+                        showResult(result, finalSymbols);
+                        
+                        // スピン終了
+                        isSpinning = false;
+                        spinButton.disabled = false;
+                    });
+                }
+                
+                // リールアニメーション
+                function animateReels(symbols, callback) {
+                    const spinDuration = gameManager.config ? gameManager.config.gameSettings.spinDuration : 2000;
+                    const reelStopDelay = gameManager.config ? gameManager.config.gameSettings.reelStopDelay : 500;
+                    const animationSpeed = gameManager.config ? gameManager.config.gameSettings.animationSpeed : 20;
+                    
+                    // 各リールのアニメーション
+                    reels.forEach((reel, index) => {
+                        const symbolElement = reel.querySelector('.symbol');
+                        let currentPos = 0;
+                        let spinInterval;
+                        
+                        // スピンアニメーション開始
+                        spinInterval = setInterval(() => {
+                            currentPos += animationSpeed;
+                            const symbolIndex = Math.floor(currentPos / 50) % symbols.length;
+                            symbolElement.textContent = symbols[symbolIndex];
+                        }, 50);
+                        
+                        // 指定時間後にリールを停止
+                        setTimeout(() => {
+                            clearInterval(spinInterval);
+                            
+                            // 最後のリールが停止したらコールバックを実行
+                            if (index === reels.length - 1) {
+                                setTimeout(callback, 500);
+                            }
+                        }, spinDuration + (index * reelStopDelay));
+                    });
+                }
+                
+                // リールの表示を更新
+                function updateReels(symbols) {
+                    reels.forEach((reel, index) => {
+                        const symbolElement = reel.querySelector('.symbol');
+                        symbolElement.textContent = symbols[index];
+                    });
+                }
+                
+                // 結果の表示
+                function showResult(result, symbols) {
+                    // 当選判定
+                    if (result !== 'lose') {
+                        const winPattern = gameManager.config.winPatterns[result];
+                        
+                        // 当選メッセージの表示
+                        resultMessage.textContent = winPattern.message;
+                        resultMessage.classList.add('show');
+                        
+                        // 当選したリールをハイライト
+                        highlightWinningReels(symbols);
+                        
+                        // 特典コードの生成と表示
+                        const code = gameManager.generateCode(result);
+                        resultCode.textContent = code;
+                        resultCode.classList.add('show');
+                        copyButton.style.display = 'inline-block';
+                        
+                        // ジャックポットの場合は特別なアニメーション
+                        if (result === 'jackpot') {
+                            showJackpotAnimation();
+                        }
+                    } else {
+                        // ハズレメッセージ
+                        resultMessage.textContent = 'もう一度チャレンジ！';
+                        resultMessage.classList.add('show');
+                    }
+                    
+                    // 設定を保存
+                    gameManager.saveConfig();
+                }
+                
+                // 当選したリールのハイライト
+                function highlightWinningReels(symbols) {
+                    // 全て同じ場合
+                    if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
+                        reels.forEach(reel => {
+                            reel.classList.add('win');
+                        });
+                    }
+                    // 2つ同じ場合
+                    else if (symbols[0] === symbols[1]) {
+                        reels[0].classList.add('win');
+                        reels[1].classList.add('win');
+                    }
+                    else if (symbols[1] === symbols[2]) {
+                        reels[1].classList.add('win');
+                        reels[2].classList.add('win');
+                    }
+                    else if (symbols[0] === symbols[2]) {
+                        reels[0].classList.add('win');
+                        reels[2].classList.add('win');
+                    }
+                    // 特定のパターン
+                    else {
+                        // 特定のパターンに応じたハイライト
+                        // 例: ['🍒', '🍋', '🍒'] など
+                        if (symbols[0] === '🍒' && symbols[2] === '🍒') {
+                            reels[0].classList.add('win');
+                            reels[2].classList.add('win');
+                        }
+                    }
+                }
+                
+                // ジャックポットアニメーション
+                function showJackpotAnimation() {
+                    jackpotAnimation.classList.add('show');
+                    
+                    // 紙吹雪アニメーション
+                    for (let i = 0; i < 100; i++) {
+                        const confetti = document.createElement('div');
+                        confetti.classList.add('confetti');
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.animationDelay = Math.random() * 5 + 's';
+                        confetti.style.backgroundColor = getRandomColor();
+                        jackpotAnimation.appendChild(confetti);
+                    }
+                    
+                    // アニメーション終了後にクリーンアップ
+                    setTimeout(() => {
+                        jackpotAnimation.classList.remove('show');
+                        jackpotAnimation.innerHTML = '';
+                    }, 5000);
+                }
+                
+                // ランダムな色を生成
+                function getRandomColor() {
+                    const colors = ['#e94560', '#0f3460', '#e9c46a', '#2a9d8f', '#f4a261', '#ffb703'];
+                    return colors[Math.floor(Math.random() * colors.length)];
+                }
+            }
+        });
+    </script>
 </body>
 </html>
