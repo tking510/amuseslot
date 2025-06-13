@@ -312,30 +312,6 @@
             border-radius: 8px;
         }
 
-        .pattern-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .pattern-list li {
-            background: #e9ecef;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .pattern-list li span {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .pattern-list li .actions button {
-            margin-left: 10px;
-        }
-
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -365,72 +341,140 @@
         </div>
 
         <div class="content">
-            <!-- 確率パターン管理セクション -->
+            <!-- 確率設定セクション -->
             <div class="section">
-                <h2>✨ 確率パターン管理</h2>
-                <div id="patternAlert"></div>
-                <div class="form-group">
-                    <label for="patternId">新しいパターンID</label>
-                    <input type="text" id="patternId" placeholder="例: pattern_a, special_event">
-                </div>
+                <h2>⚙️ 確率設定</h2>
+                <div id="probabilityAlert"></div>
+                
                 <div class="probability-grid">
                     <div class="probability-item">
                         <h3>🎉 ジャックポット</h3>
+                        <div class="current-value" id="currentJackpot">1.0%</div>
                         <div class="form-group">
-                            <label for="newJackpotProb">確率 (%)</label>
-                            <input type="number" id="newJackpotProb" min="0" max="100" step="0.1" value="1.0">
-                        </div>
-                        <div class="form-group">
-                            <label for="newJackpotCode">ボーナスコード</label>
-                            <input type="text" id="newJackpotCode" placeholder="例: JP_BONUS_CODE">
+                            <label for="jackpotProb">確率 (%)</label>
+                            <input type="number" id="jackpotProb" min="0" max="100" step="0.1" value="1.0">
                         </div>
                     </div>
                     
                     <div class="probability-item">
                         <h3>🎊 ビッグウィン</h3>
+                        <div class="current-value" id="currentBigWin">5.0%</div>
                         <div class="form-group">
-                            <label for="newBigWinProb">確率 (%)</label>
-                            <input type="number" id="newBigWinProb" min="0" max="100" step="0.1" value="5.0">
-                        </div>
-                        <div class="form-group">
-                            <label for="newBigWinCode">ボーナスコード</label>
-                            <input type="text" id="newBigWinCode" placeholder="例: BW_REWARD_CODE">
+                            <label for="bigWinProb">確率 (%)</label>
+                            <input type="number" id="bigWinProb" min="0" max="100" step="0.1" value="5.0">
                         </div>
                     </div>
                     
                     <div class="probability-item">
                         <h3>✨ スモールウィン</h3>
+                        <div class="current-value" id="currentSmallWin">15.0%</div>
                         <div class="form-group">
-                            <label for="newSmallWinProb">確率 (%)</label>
-                            <input type="number" id="newSmallWinProb" min="0" max="100" step="0.1" value="15.0">
-                        </div>
-                        <div class="form-group">
-                            <label for="newSmallWinCode">ボーナスコード</label>
-                            <input type="text" id="newSmallWinCode" placeholder="例: SW_GIFT_CODE">
+                            <label for="smallWinProb">確率 (%)</label>
+                            <input type="number" id="smallWinProb" min="0" max="100" step="0.1" value="15.0">
                         </div>
                     </div>
                     
                     <div class="probability-item">
                         <h3>💔 ハズレ</h3>
+                        <div class="current-value" id="currentLose">79.0%</div>
                         <div class="form-group">
-                            <label for="newLoseProb">確率 (%)</label>
-                            <input type="number" id="newLoseProb" min="0" max="100" step="0.1" value="79.0" readonly style="background: #f8f9fa;">
-                        </div>
-                        <div class="form-group">
-                            <label for="newLoseCode">ボーナスコード</label>
-                            <input type="text" id="newLoseCode" placeholder="例: LOSE_TRY_AGAIN">
+                            <label>確率 (自動計算)</label>
+                            <input type="text" id="loseProb" value="79.0%" readonly style="background: #f8f9fa;">
                         </div>
                     </div>
                 </div>
                 
-                <button class="btn btn-success" onclick="addOrUpdatePattern()">
-                    ➕ パターンを追加/更新
+                <button class="btn btn-success" onclick="updateProbabilities()">
+                    💾 確率を更新
                 </button>
+                
+                <button class="btn" onclick="resetProbabilities()">
+                    🔄 デフォルトに戻す
+                </button>
+            </div>
 
-                <h3>既存の確率パターン</h3>
-                <ul id="patternList" class="pattern-list">
-                    <!-- パターンがここに動的に追加されます -->
-                </ul>
+            <!-- ボーナスコード設定セクション -->
+            <div class="section">
+                <h2>🎁 ボーナスコード設定</h2>
+                <div id="bonusCodeAlert"></div>
+                <div class="probability-grid">
+                    <div class="probability-item">
+                        <h3>🎉 ジャックポットコード</h3>
+                        <div class="form-group">
+                            <label for="jackpotCode">固定コード</label>
+                            <input type="text" id="jackpotCode" placeholder="例: JP_BONUS_CODE">
+                        </div>
+                    </div>
+                    <div class="probability-item">
+                        <h3>🎊 ビッグウィンコード</h3>
+                        <div class="form-group">
+                            <label for="bigWinCode">固定コード</label>
+                            <input type="text" id="bigWinCode" placeholder="例: BW_REWARD_CODE">
+                        </div>
+                    </div>
+                    <div class="probability-item">
+                        <h3>✨ スモールウィンコード</h3>
+                        <div class="form-group">
+                            <label for="smallWinCode">固定コード</label>
+                            <input type="text" id="smallWinCode" placeholder="例: SW_GIFT_CODE">
+                        </div>
+                    </div>
+                    <div class="probability-item">
+                        <h3>💔 ハズレコード</h3>
+                        <div class="form-group">
+                            <label for="loseCode">固定コード</label>
+                            <input type="text" id="loseCode" placeholder="例: LOSE_TRY_AGAIN">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="updateBonusCodes()">
+                    💾 ボーナスコードを更新
+                </button>
+            </div>
+
+            <!-- 確率パターン管理セクション -->
+            <div class="section">
+                <h2>🔢 確率パターン管理</h2>
+                <div id="patternAlert"></div>
+                <div class="form-group">
+                    <label for="patternSelect">パターンを選択</label>
+                    <select id="patternSelect" onchange="loadPatternSettings()">
+                        <!-- Options will be loaded by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="newPatternId">新しいパターンID</label>
+                    <input type="text" id="newPatternId" placeholder="例: pattern2">
+                </div>
+                <button class="btn btn-success" onclick="saveCurrentPattern()">
+                    ➕ 現在の設定を新しいパターンとして保存
+                </button>
+                <button class="btn" onclick="updateSelectedPattern()">
+                    💾 選択したパターンを更新
+                </button>
+                <button class="btn btn-danger" onclick="deleteSelectedPattern()">
+                    🗑️ 選択したパターンを削除
+                </button>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>ゲームURL (選択中のパターン)</label>
+                    <input type="text" id="gameUrlDisplay" readonly style="background: #f8f9fa;">
+                    <button class="btn" onclick="copyToClipboard(document.getElementById(\'gameUrlDisplay\').value)">
+                        📋 URLをコピー
+                    </button>
+                    <button class="btn" onclick="openGameUrl()">
+                        🚀 ゲームURLを開く
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label>テスト用ゲームURL (何度でもプレイ可能)</label>
+                    <input type="text" id="testGameUrlDisplay" readonly style="background: #f8f9fa;">
+                    <button class="btn" onclick="copyToClipboard(document.getElementById(\'testGameUrlDisplay\').value)">
+                        📋 URLをコピー
+                    </button>
+                    <button class="btn" onclick="openTestGameUrl()">
+                        🚀 テスト用ゲームURLを開く
+                    </button>
+                </div>
             </div>
 
             <!-- 統計情報セクション -->
@@ -502,7 +546,7 @@
                 <h2>🎮 ゲームプレビュー</h2>
                 
                 <div class="game-preview">
-                    <iframe id="gamePreviewFrame" src="index.html" title="スロットゲーム"></iframe>
+                    <iframe src="index.html" title="スロットゲーム"></iframe>
                 </div>
                 
                 <button class="btn" onclick="openGameInNewTab()">
@@ -517,121 +561,88 @@
         // 管理画面の初期化
         document.addEventListener('DOMContentLoaded', async () => {
             await gameManager.loadConfig();
-            refreshPatternList();
+            initPatternManagement(); // パターン管理の初期化
+            loadCurrentSettings();
             refreshStats();
             refreshCodeHistory();
+            loadBonusCodeSettings(); // ボーナスコード設定を読み込む
             
-            // 新しいパターン追加/更新フォームの確率入力の自動計算
-            ['newJackpotProb', 'newBigWinProb', 'newSmallWinProb'].forEach(id => {
-                document.getElementById(id).addEventListener('input', calculateNewLoseProb);
+            // 確率入力の自動計算
+            ['jackpotProb', 'bigWinProb', 'smallWinProb'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateLoseProb);
             });
         });
 
-        // 新しいパターン追加/更新フォームのハズレ確率を計算
-        function calculateNewLoseProb() {
-            const jackpot = parseFloat(document.getElementById('newJackpotProb').value) || 0;
-            const bigWin = parseFloat(document.getElementById('newBigWinProb').value) || 0;
-            const smallWin = parseFloat(document.getElementById('newSmallWinProb').value) || 0;
+        // 現在の設定を読み込み
+        function loadCurrentSettings() {
+            if (!gameManager.config) return;
+            
+            const probs = gameManager.getCurrentConfig().probabilities;
+            document.getElementById('jackpotProb').value = (probs.jackpot * 100).toFixed(1);
+            document.getElementById('bigWinProb').value = (probs.bigWin * 100).toFixed(1);
+            document.getElementById('smallWinProb').value = (probs.smallWin * 100).toFixed(1);
+            calculateLoseProb();
+
+            document.getElementById('currentJackpot').textContent = (probs.jackpot * 100).toFixed(1) + '%';
+            document.getElementById('currentBigWin').textContent = (probs.bigWin * 100).toFixed(1) + '%';
+            document.getElementById('currentSmallWin').textContent = (probs.smallWin * 100).toFixed(1) + '%';
+            document.getElementById('currentLose').textContent = (probs.lose * 100).toFixed(1) + '%';
+        }
+
+        // 確率を更新
+        function updateProbabilities() {
+            const jackpot = parseFloat(document.getElementById('jackpotProb').value) / 100;
+            const bigWin = parseFloat(document.getElementById('bigWinProb').value) / 100;
+            const smallWin = parseFloat(document.getElementById('smallWinProb').value) / 100;
+            const lose = 1 - (jackpot + bigWin + smallWin);
+
+            if (jackpot + bigWin + smallWin > 1) {
+                showAlert('probabilityAlert', '合計確率が100%を超えています。', 'error');
+                return;
+            }
+
+            gameManager.updateProbabilities(jackpot, bigWin, smallWin, lose);
+            loadCurrentSettings();
+            gameManager.saveConfig();
+            showAlert('probabilityAlert', '確率設定を更新しました！', 'success');
+        }
+
+        // 確率をデフォルトに戻す
+        function resetProbabilities() {
+            gameManager.resetProbabilities();
+            loadCurrentSettings();
+            gameManager.saveConfig();
+            showAlert('probabilityAlert', '確率設定をデフォルトに戻しました。', 'success');
+        }
+
+        // 負け確率を計算
+        function calculateLoseProb() {
+            const jackpot = parseFloat(document.getElementById('jackpotProb').value) || 0;
+            const bigWin = parseFloat(document.getElementById('bigWinProb').value) || 0;
+            const smallWin = parseFloat(document.getElementById('smallWinProb').value) || 0;
             const lose = 100 - (jackpot + bigWin + smallWin);
-            document.getElementById('newLoseProb').value = lose.toFixed(1);
+            document.getElementById('loseProb').value = lose.toFixed(1) + '%';
         }
 
-        // パターンを追加または更新
-        function addOrUpdatePattern() {
-            const patternId = document.getElementById('patternId').value.trim();
-            if (!patternId) {
-                showAlert('patternAlert', 'パターンIDを入力してください。', 'error');
-                return;
-            }
-
-            const jackpotProb = parseFloat(document.getElementById('newJackpotProb').value);
-            const bigWinProb = parseFloat(document.getElementById('newBigWinProb').value);
-            const smallWinProb = parseFloat(document.getElementById('newSmallWinProb').value);
-            const loseProb = parseFloat(document.getElementById('newLoseProb').value);
-
-            if (isNaN(jackpotProb) || isNaN(bigWinProb) || isNaN(smallWinProb) || isNaN(loseProb) || (jackpotProb + bigWinProb + smallWinProb + loseProb !== 100 && loseProb !== 100 - (jackpotProb + bigWinProb + smallWinProb))) {
-                showAlert('patternAlert', '確率の合計が100%になるように設定してください。', 'error');
-                return;
-            }
-
-            const probabilities = {
-                jackpot: jackpotProb / 100,
-                bigWin: bigWinProb / 100,
-                smallWin: smallWinProb / 100,
-                lose: loseProb / 100
-            };
-
-            const bonusCodes = {
-                jackpot: document.getElementById('newJackpotCode').value.trim(),
-                bigWin: document.getElementById('newBigWinCode').value.trim(),
-                smallWin: document.getElementById('newSmallWinCode').value.trim(),
-                lose: document.getElementById('newLoseCode').value.trim()
-            };
-
-            gameManager.updatePattern(patternId, probabilities, bonusCodes);
-            showAlert('patternAlert', `パターン '${patternId}' を保存しました。`, 'success');
-            refreshPatternList();
-            // フォームをクリア
-            document.getElementById('patternId').value = '';
-            document.getElementById('newJackpotProb').value = '1.0';
-            document.getElementById('newBigWinProb').value = '5.0';
-            document.getElementById('newSmallWinProb').value = '15.0';
-            document.getElementById('newLoseProb').value = '79.0';
-            document.getElementById('newJackpotCode').value = '';
-            document.getElementById('newBigWinCode').value = '';
-            document.getElementById('newSmallWinCode').value = '';
-            document.getElementById('newLoseCode').value = '';
+        // ボーナスコード設定を読み込み
+        function loadBonusCodeSettings() {
+            if (!gameManager.config) return;
+            const bonusCodes = gameManager.getCurrentConfig().bonusCodes;
+            document.getElementById('jackpotCode').value = bonusCodes.jackpot || '';
+            document.getElementById('bigWinCode').value = bonusCodes.bigWin || '';
+            document.getElementById('smallWinCode').value = bonusCodes.smallWin || '';
+            document.getElementById('loseCode').value = bonusCodes.lose || '';
         }
 
-        // 既存のパターンリストを更新
-        function refreshPatternList() {
-            const patternList = document.getElementById('patternList');
-            patternList.innerHTML = '';
-            const patterns = gameManager.getAllPatterns();
-            for (const id in patterns) {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>パターンID: ${id}</span>
-                    <div class="actions">
-                        <button class="btn" onclick="loadPatternToForm('${id}')">編集</button>
-                        <button class="btn btn-danger" onclick="deletePattern('${id}')">削除</button>
-                        <button class="btn btn-success" onclick="openPatternGame('${id}')">ゲームURLを開く</button>
-                    </div>
-                `;
-                patternList.appendChild(li);
-            }
-        }
-
-        // パターンをフォームに読み込む
-        function loadPatternToForm(patternId) {
-            const pattern = gameManager.getAllPatterns()[patternId];
-            if (pattern) {
-                document.getElementById('patternId').value = patternId;
-                document.getElementById('newJackpotProb').value = (pattern.probabilities.jackpot * 100).toFixed(1);
-                document.getElementById('newBigWinProb').value = (pattern.probabilities.bigWin * 100).toFixed(1);
-                document.getElementById('newSmallWinProb').value = (pattern.probabilities.smallWin * 100).toFixed(1);
-                document.getElementById('newLoseProb').value = (pattern.probabilities.lose * 100).toFixed(1);
-                document.getElementById('newJackpotCode').value = pattern.bonusCodes.jackpot;
-                document.getElementById('newBigWinCode').value = pattern.bonusCodes.bigWin;
-                document.getElementById('newSmallWinCode').value = pattern.bonusCodes.smallWin;
-                document.getElementById('newLoseCode').value = pattern.bonusCodes.lose;
-                showAlert('patternAlert', `パターン '${patternId}' をフォームに読み込みました。`, 'success');
-            }
-        }
-
-        // パターンを削除
-        function deletePattern(patternId) {
-            if (confirm(`パターン '${patternId}' を本当に削除しますか？`)) {
-                gameManager.deletePattern(patternId);
-                showAlert('patternAlert', `パターン '${patternId}' を削除しました。`, 'warning');
-                refreshPatternList();
-            }
-        }
-
-        // 特定のパターンでゲームを開く
-        function openPatternGame(patternId) {
-            const gameUrl = `${window.basePath}index.html?pattern=${patternId}`;
-            window.open(gameUrl, '_blank');
+        // ボーナスコードを更新
+        function updateBonusCodes() {
+            const jackpotCode = document.getElementById('jackpotCode').value;
+            const bigWinCode = document.getElementById('bigWinCode').value;
+            const smallWinCode = document.getElementById('smallWinCode').value;
+            const loseCode = document.getElementById('loseCode').value;
+            gameManager.updateBonusCodes(jackpotCode, bigWinCode, smallWinCode, loseCode);
+            gameManager.saveConfig();
+            showAlert('bonusCodeAlert', 'ボーナスコード設定を更新しました！', 'success');
         }
 
         // 統計を更新
@@ -647,49 +658,42 @@
 
         // 統計をクリア
         function clearStats() {
-            if (confirm('統計情報を本当にクリアしますか？')) {
-                gameManager.statistics = {
-                    totalSpins: 0,
-                    wins: {
-                        jackpot: 0,
-                        bigWin: 0,
-                        smallWin: 0
-                    },
-                    codesGenerated: []
-                };
-                gameManager.saveStatistics();
+            if (confirm('本当に統計情報をクリアしますか？')) {
+                gameManager.clearStatistics();
                 refreshStats();
-                showAlert('patternAlert', '統計情報をクリアしました。', 'warning');
+                showAlert('bonusCodeAlert', '統計情報をクリアしました。', 'warning');
             }
         }
 
         // コード履歴を更新
         function refreshCodeHistory() {
             const codeHistoryDiv = document.getElementById('codeHistory');
+            const codes = gameManager.getStatistics().codesGenerated;
             codeHistoryDiv.innerHTML = '';
-            const codes = gameManager.statistics.codesGenerated;
+
             if (codes.length === 0) {
                 codeHistoryDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #7f8c8d;">まだコードが生成されていません</div>';
                 return;
             }
+
             codes.forEach(item => {
-                const div = document.createElement('div');
-                div.classList.add('code-item');
-                div.innerHTML = `
+                const codeItem = document.createElement('div');
+                codeItem.classList.add('code-item');
+                codeItem.innerHTML = `
                     <div>
-                        <div class="code-value">${item.code}</div>
-                        <div class="code-timestamp">${new Date(item.timestamp).toLocaleString()} (パターン: ${item.pattern})</div>
+                        <span class="code-value">${item.code}</span>
+                        <span class="code-type ${item.result}">${item.result.toUpperCase()}</span>
                     </div>
-                    <span class="code-type ${item.type}">${item.type}</span>
+                    <span class="code-timestamp">${new Date(item.timestamp).toLocaleString()}</span>
                 `;
-                codeHistoryDiv.appendChild(div);
+                codeHistoryDiv.prepend(codeItem); // 最新のものを上に追加
             });
         }
 
         // コード履歴をエクスポート
         function exportCodes() {
-            const codes = gameManager.statistics.codesGenerated.map(item => 
-                `タイプ: ${item.type}, コード: ${item.code}, タイムスタンプ: ${new Date(item.timestamp).toLocaleString()}, パターン: ${item.pattern}`
+            const codes = gameManager.getStatistics().codesGenerated.map(item => 
+                `コード: ${item.code}, 結果: ${item.result}, タイムスタンプ: ${new Date(item.timestamp).toLocaleString()}, パターン: ${item.pattern}`
             ).join('\n');
             
             const blob = new Blob([codes], { type: 'text/plain' });
@@ -701,24 +705,20 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showAlert('patternAlert', 'コード履歴をエクスポートしました。', 'success');
+            showAlert('bonusCodeAlert', 'コード履歴をエクスポートしました。', 'success');
         }
 
         // コード履歴をクリア
         function clearCodes() {
-            if (confirm('コード履歴を本当にクリアしますか？')) {
-                gameManager.statistics.codesGenerated = [];
-                gameManager.saveStatistics();
-                refreshCodeHistory();
-                showAlert('patternAlert', 'コード履歴をクリアしました。', 'warning');
-            }
+            gameManager.statistics.codesGenerated = [];
+            gameManager.saveStatistics();
+            refreshCodeHistory();
+            showAlert('bonusCodeAlert', 'コード履歴をクリアしました。', 'warning');
         }
 
         // 新しいタブでゲームを開く
         function openGameInNewTab() {
-            // 現在アクティブなパターンで開く
-            const gameUrl = `${window.basePath}index.html?pattern=${gameManager.activePatternId}`;
-            window.open(gameUrl, '_blank');
+            window.open(window.basePath + 'index.html', '_blank');
         }
 
         // アラート表示
@@ -728,6 +728,110 @@
             setTimeout(() => {
                 alertDiv.innerHTML = '';
             }, 3000);
+        }
+
+        // パターン管理の初期化
+        function initPatternManagement() {
+            const patternSelect = document.getElementById('patternSelect');
+            patternSelect.innerHTML = ''; // クリア
+            
+            const patterns = gameManager.getAllProbabilityPatterns();
+            for (const id in patterns) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = id;
+                patternSelect.appendChild(option);
+            }
+            // 現在アクティブなパターンを選択状態にする
+            patternSelect.value = gameManager.activePatternId;
+            updateGameUrls();
+        }
+
+        // 選択したパターン設定を読み込み
+        function loadPatternSettings() {
+            const selectedPatternId = document.getElementById('patternSelect').value;
+            gameManager.setActivePattern(selectedPatternId);
+            loadCurrentSettings();
+            loadBonusCodeSettings();
+            updateGameUrls();
+            showAlert('patternAlert', `パターン「${selectedPatternId}」を読み込みました。`, 'success');
+        }
+
+        // 現在の設定を新しいパターンとして保存
+        function saveCurrentPattern() {
+            const newPatternId = document.getElementById('newPatternId').value.trim();
+            if (!newPatternId) {
+                showAlert('patternAlert', '新しいパターンIDを入力してください。', 'error');
+                return;
+            }
+            if (gameManager.saveCurrentProbabilitiesAsNewPattern(newPatternId)) {
+                initPatternManagement();
+                document.getElementById('newPatternId').value = '';
+                showAlert('patternAlert', `現在の設定をパターン「${newPatternId}」として保存しました！`, 'success');
+            } else {
+                showAlert('patternAlert', 'パターンIDが既に存在します。', 'error');
+            }
+        }
+
+        // 選択したパターンを更新
+        function updateSelectedPattern() {
+            const selectedPatternId = document.getElementById('patternSelect').value;
+            if (gameManager.updateSelectedPattern(selectedPatternId)) {
+                showAlert('patternAlert', `パターン「${selectedPatternId}」を更新しました！`, 'success');
+            } else {
+                showAlert('patternAlert', 'パターンの更新に失敗しました。', 'error');
+            }
+        }
+
+        // 選択した確率パターンを削除
+        function deleteSelectedPattern() {
+            const patternIdToDelete = document.getElementById('patternSelect').value;
+            if (patternIdToDelete === 'default') {
+                showAlert('patternAlert', 'デフォルトパターンは削除できません。', 'error');
+                return;
+            }
+
+            if (confirm(`本当にパターン「${patternIdToDelete}」を削除しますか？`)) {
+                if (gameManager.deleteProbabilityPattern(patternIdToDelete)) {
+                    initPatternManagement();
+                    showAlert('patternAlert', `パターン「${patternIdToDelete}」を削除しました。`, 'success');
+                } else {
+                    showAlert('patternAlert', 'パターンの削除に失敗しました。', 'error');
+                }
+            }
+        }
+
+        // ゲームURLを更新
+        function updateGameUrls() {
+            const selectedPatternId = document.getElementById('patternSelect').value;
+            const baseUrl = window.location.origin + window.basePath + 'index.html';
+            const gameUrl = `${baseUrl}?pattern=${selectedPatternId}`;
+            const testGameUrl = `${baseUrl}?pattern=${selectedPatternId}&test=true`;
+
+            document.getElementById('gameUrlDisplay').value = gameUrl;
+            document.getElementById('testGameUrlDisplay').value = testGameUrl;
+        }
+
+        // ゲームURLを開く
+        function openGameUrl() {
+            const url = document.getElementById('gameUrlDisplay').value;
+            window.open(url, '_blank');
+        }
+
+        // テスト用ゲームURLを開く
+        function openTestGameUrl() {
+            const url = document.getElementById('testGameUrlDisplay').value;
+            window.open(url, '_blank');
+        }
+
+        // クリップボードにコピー
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('patternAlert', 'URLをクリップボードにコピーしました！', 'success');
+            }).catch(err => {
+                console.error('クリップボードへのコピーに失敗しました:', err);
+                showAlert('patternAlert', 'URLのコピーに失敗しました。', 'error');
+            });
         }
     </script>
 </body>
