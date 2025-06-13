@@ -14,8 +14,6 @@
     </script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap' );
-
         * {
             margin: 0;
             padding: 0;
@@ -23,8 +21,10 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #0a0a0a, #222222, #0a0a0a);
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
             color: #fff;
             overflow-x: hidden;
             min-height: 100vh;
@@ -32,384 +32,360 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            position: relative;
         }
 
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png' ); /* カーボンファイバーのテクスチャ */
-            opacity: 0.1;
-            z-index: -1;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            width: 250px; /* ロゴのサイズ調整 */
-            height: auto;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
-        }
-
-        .title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3.5em;
-            color: #ffd700; /* ゴールド */
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 25px rgba(255, 215, 0, 0.5);
-            margin-bottom: 10px;
-            letter-spacing: 5px;
-        }
-
-        .subtitle {
-            font-size: 1.2em;
-            color: #aaa;
-            margin-bottom: 30px;
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .game-container {
-            background: linear-gradient(145deg, #333333, #111111);
-            border: 5px solid #ffd700; /* ゴールドの枠線 */
+            background: linear-gradient(135deg, #2c1810, #4a2c2a);
+            border: 5px solid #ffd700;
             border-radius: 20px;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(0, 0, 0, 0.8);
             padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5), inset 0 0 30px rgba(255, 215, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
             position: relative;
             overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            animation: shine 2s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .title {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
+            margin-bottom: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .slot-machine {
+            background: linear-gradient(135deg, #1a1a1a, #333);
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         .reels-container {
             display: flex;
-            gap: 15px;
-            perspective: 1000px;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
         }
 
         .reel {
-            width: 120px;
-            height: 150px;
-            background: #000;
-            border: 3px solid #555;
+            width: 80px;
+            height: 120px;
+            background: linear-gradient(135deg, #000, #222);
+            border: 2px solid #ffd700;
             border-radius: 10px;
             overflow: hidden;
             position: relative;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+            box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3);
         }
 
-        .reel-inner {
+        .reel-symbols {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            transition: transform 0.1s linear; /* スピン中のアニメーション */
+            transition: transform 0.1s ease;
         }
 
         .symbol {
-            width: 100%;
-            height: 150px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3em;
-            background: #1a1a1a;
-            border-bottom: 1px solid #333;
-            color: #eee;
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            border-bottom: 1px solid #444;
         }
 
         .spin-button {
-            background: linear-gradient(145deg, #ff416c, #ff4b2b); /* グラデーションボタン */
-            color: white;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
             border: none;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
             padding: 15px 40px;
             border-radius: 50px;
-            font-size: 1.8em;
-            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(255, 75, 43, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        .spin-button:hover:not(:disabled) {
+        .spin-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(255, 75, 43, 0.6);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
         }
 
-        .spin-button:active:not(:disabled) {
+        .spin-button:active {
             transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(255, 75, 43, 0.3);
         }
 
         .spin-button:disabled {
-            background: linear-gradient(145deg, #555, #333);
+            background: #666;
             cursor: not-allowed;
+            transform: none;
             box-shadow: none;
         }
 
         .result-display {
-            background: linear-gradient(145deg, #2c3e50, #1a242f); /* ダークブルー */
-            border: 3px solid #3498db; /* ブルーの枠線 */
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            width: 80%;
-            max-width: 400px;
-            box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
-            display: none; /* 初期状態では非表示 */
-            flex-direction: column;
-            gap: 15px;
+            margin: 20px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .result-message {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.2em;
-            font-weight: bold;
-            color: #3498db; /* ブルー */
-            text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
-        }
-
-        .result-code-label {
-            font-size: 1.1em;
-            color: #aaa;
-        }
-
-        .result-code {
-            font-family: 'Orbitron', sans-serif;
+        .win-message {
             font-size: 1.8em;
-            font-weight: bold;
-            color: #ffd700; /* ゴールド */
-            background: #000;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: 1px dashed #ffd700;
-            word-break: break-all;
-        }
-
-        .info-message {
-            font-size: 1em;
-            color: #bbb;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .info-message span {
             color: #ffd700;
+            text-shadow: 0 0 20px #ffd700;
+            animation: winFlash 0.5s ease-in-out infinite;
+        }
+
+        @keyframes winFlash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .code-display {
+            background: linear-gradient(135deg, #0f4c75, #3282b8);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1.5em;
             font-weight: bold;
-        }
-
-        /* アニメーション */
-        @keyframes spinReel {
-            from { transform: translateY(0); }
-            to { transform: translateY(-100%); } /* 無限に回るように */
-        }
-
-        .spinning .reel-inner {
-            animation: spinReel 0.1s linear infinite; /* 高速で無限にスピン */
-        }
-
-        .winning-animation {
-            animation: winEffect 0.8s ease-out forwards;
-        }
-
-        @keyframes winEffect {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
         .jackpot-effect {
-            animation: jackpotGlow 1.5s infinite alternate;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3), transparent);
+            pointer-events: none;
+            opacity: 0;
+            animation: jackpotFlash 0.5s ease-in-out;
         }
 
-        @keyframes jackpotGlow {
-            from { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3); }
-            to { box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), 0 0 100px rgba(255, 215, 0, 0.6); }
+        @keyframes jackpotFlash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .probability-info {
+            font-size: 0.8em;
+            color: #ccc;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 80%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
 
         @media (max-width: 600px) {
-            .title {
-                font-size: 2.5em;
-            }
-            .reel {
-                width: 90px;
-                height: 120px;
-            }
-            .symbol {
-                font-size: 2.5em;
-                height: 120px;
-            }
-            .spin-button {
-                font-size: 1.5em;
-                padding: 12px 30px;
-            }
-            .result-message {
-                font-size: 1.8em;
-            }
-            .result-code {
-                font-size: 1.5em;
-            }
+            .title { font-size: 2em; }
+            .reel { width: 70px; height: 100px; }
+            .symbol { height: 100px; font-size: 2.5em; }
+            .spin-button { font-size: 1.2em; padding: 12px 30px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="amuse_logo.png" alt="AMUSE VIP Logo" class="logo">
-        <div class="title">MEGA SLOT</div>
-        <div class="subtitle">あなたの運を試そう！</div>
+    <div class="game-container">
+        <div class="logo-container" id="logoContainer">
+            <!-- ロゴ画像はJavaScriptで動的に読み込まれます -->
+        </div>
+        <h1 class="title">🎰 MEGA SLOT 🎰</h1>
+        
+        <div class="slot-machine">
+            <div class="reels-container">
+                <div class="reel" id="reel1">
+                    <div class="reel-symbols" id="symbols1"></div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="reel-symbols" id="symbols2"></div>
+                </div>
+                <div class="reel" id="reel3">
+                    <div class="reel-symbols" id="symbols3"></div>
+                </div>
+            </div>
+            
+            <button class="spin-button" id="spinButton" onclick="spin()">
+                🎲 SPIN 🎲
+            </button>
+        </div>
+        
+        <div class="result-display" id="resultDisplay"></div>
+        
+        <div class="probability-info">
+            <p>🍀 運試しをしてみよう！ 🍀</p>
+            <p>特別なコードをゲットしてお得な特典を受け取ろう！</p>
+        </div>
     </div>
 
-    <div class="game-container" id="gameContainer">
-        <div class="reels-container">
-            <div class="reel" id="reel1"><div class="reel-inner"></div></div>
-            <div class="reel" id="reel2"><div class="reel-inner"></div></div>
-            <div class="reel" id="reel3"><div class="reel-inner"></div></div>
-        </div>
-
-        <button class="spin-button" id="spinButton">
-            <span class="material-icons">🎰</span> SPIN <span class="material-icons">🎰</span>
-        </button>
-
-        <div class="result-display" id="resultDisplay">
-            <div class="result-message" id="resultMessage"></div>
-            <div class="result-code-label">コード:</div>
-            <div class="result-code" id="resultCode"></div>
-        </div>
-
-        <div class="info-message" id="infoMessage">
-            <span>運試しをしてみよう！</span><br>
-            特別なコードをゲットしてお得な特典を受け取ろう！
-        </div>
-    </div>
-
-    <script src="game-manager.js"></script>
+    <script src="./game-manager.js" defer></script>
     <script>
-        document.addEventListener("DOMContentLoaded", async () => {
+        // ゲーム設定
+        const reelCount = 3;
+        let isSpinning = false;
+        let isTestMode = false; // テストモードフラグ
+
+        // リール初期化
+        async function initializeReels() {
+            console.log('initializeReels called');
+            // ゲームマネージャーの設定読み込みを待つ
             await gameManager.loadConfig();
-            const spinButton = document.getElementById("spinButton");
-            const resultDisplay = document.getElementById("resultDisplay");
-            const resultMessage = document.getElementById("resultMessage");
-            const resultCode = document.getElementById("resultCode");
-            const infoMessage = document.getElementById("infoMessage");
-            const gameContainer = document.getElementById("gameContainer");
+            console.log('config loaded:', gameManager.config);
 
-            const reels = [
-                document.getElementById("reel1"),
-                document.getElementById("reel2"),
-                document.getElementById("reel3")
-            ];
-
-            const reelInners = reels.map(reel => reel.querySelector(".reel-inner"));
-
-            const currentConfig = gameManager.getCurrentConfig();
-            const symbols = currentConfig.symbols;
-
-            // リールにシンボルをセット
-            function setupReels() {
-                reelInners.forEach(reelInner => {
-                    reelInner.innerHTML = ''; // 既存のシンボルをクリア
-                    // スピンアニメーションのために十分な数のシンボルを追加
-                    for (let i = 0; i < 30; i++) { // 各リールに30個のシンボル
-                        const symbolDiv = document.createElement('div');
-                        symbolDiv.classList.add('symbol');
-                        symbolDiv.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                        reelInner.appendChild(symbolDiv);
-                    }
-                });
-            }
-
-            setupReels();
-
-            // URLパラメータからテストモードをチェック
+            // URLパラメータからテストモードを判定
             const urlParams = new URLSearchParams(window.location.search);
-            const isTestMode = urlParams.get("test") === "true";
+            isTestMode = urlParams.get('test') === 'true';
+            console.log('Test Mode:', isTestMode);
 
-            // プレイ済みチェック
-            if (!isTestMode && gameManager.hasPlayed()) {
-                spinButton.disabled = true;
-                spinButton.textContent = "本日はプレイ済みです";
-                infoMessage.innerHTML = "<span>本日は既にプレイ済みです。また明日お越しください！</span>";
+            // ロゴの表示
+            const logoContainer = document.getElementById('logoContainer');
+            const currentConfig = gameManager.getCurrentConfig();
+            if (currentConfig && currentConfig.gameSettings && currentConfig.gameSettings.logoUrl) {
+                logoContainer.innerHTML = `<img src="${currentConfig.gameSettings.logoUrl}" alt="Game Logo">`;
+            } else {
+                logoContainer.innerHTML = ''; // ロゴがない場合はクリア
             }
-
-            spinButton.addEventListener("click", async () => {
-                if (spinButton.disabled) return;
-
-                spinButton.disabled = true;
-                resultDisplay.style.display = "none";
-                gameContainer.classList.remove('jackpot-effect');
-
-                // リールをスピンさせるアニメーション
-                reelInners.forEach(reelInner => {
-                    reelInner.classList.add('spinning');
-                    reelInner.style.transform = 'translateY(0)'; // 初期位置にリセット
-                });
-
-                const result = gameManager.determineResult();
-                const finalSymbols = gameManager.setResultSymbols(result);
-
-                // 各リールを順番に停止
-                for (let i = 0; i < reels.length; i++) {
-                    await new Promise(resolve => {
-                        setTimeout(() => {
-                            reelInners[i].classList.remove('spinning');
-                            // 最終的なシンボルを配置
-                            reelInners[i].innerHTML = '';
-                            // 停止位置を調整するために、いくつかダミーシンボルを追加
-                            for (let j = 0; j < 3; j++) { // 3つはダミー
-                                const dummySymbol = document.createElement('div');
-                                dummySymbol.classList.add('symbol');
-                                dummySymbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                                reelInners[i].appendChild(dummySymbol);
-                            }
-                            const finalSymbolDiv = document.createElement('div');
-                            finalSymbolDiv.classList.add('symbol');
-                            finalSymbolDiv.textContent = finalSymbols[i];
-                            reelInners[i].appendChild(finalSymbolDiv);
-
-                            // 停止アニメーション
-                            reelInners[i].style.transition = 'transform 0.5s ease-out';
-                            reelInners[i].style.transform = `translateY(-${reelInners[i].scrollHeight - 150}px)`; // 最後のシンボルが表示されるように調整
-                            resolve();
-                        }, currentConfig.gameSettings.reelStopDelay * (i + 1));
-                    });
+            
+            for (let i = 1; i <= reelCount; i++) {
+                const symbolsContainer = document.getElementById(`symbols${i}`);
+                symbolsContainer.innerHTML = '';
+                
+                // 複数のシンボルを作成（スクロール効果用）
+                console.log('Populating reels with symbols');
+                const symbols = currentConfig.symbols;
+                for (let j = 0; j < 20; j++) { // 十分な数のシンボルを配置
+                    const symbolDiv = document.createElement('div');
+                    symbolDiv.className = 'symbol';
+                    symbolDiv.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    symbolsContainer.appendChild(symbolDiv);
                 }
+            }
+        }
 
-                // 結果表示
-                setTimeout(() => {
-                    const generatedCode = gameManager.generateCode(result);
-                    gameManager.updateStatistics(result, generatedCode);
-                    
-                    resultDisplay.style.display = "flex";
-                    resultMessage.textContent = currentConfig.winPatterns[result].message;
-                    resultCode.textContent = generatedCode;
+        // コード生成（ゲームマネージャーに委譲）
+        function generateCode(type) {
+            return gameManager.generateCode(type);
+        }
 
-                    if (result === 'jackpot') {
-                        gameContainer.classList.add('jackpot-effect');
-                    }
+        // 当選判定（ゲームマネージャーに委譲）
+        function determineResult() {
+            if (isTestMode) {
+                // テストモードでは、ジャックポット、ビッグウィン、スモールウィン、負けを順番に返す
+                const results = ['jackpot', 'bigWin', 'smallWin', 'lose'];
+                const currentSpin = gameManager.statistics.totalSpins % results.length;
+                return results[currentSpin];
+            }
+            return gameManager.determineResult();
+        }
 
-                    if (!isTestMode) {
-                        gameManager.setPlayed(); // プレイ済みを記録
-                        spinButton.textContent = "本日はプレイ済みです";
-                        infoMessage.innerHTML = "<span>本日は既にプレイ済みです。また明日お越しください！</span>";
+        // 結果に基づいてシンボルを設定（ゲームマネージャーに委譲）
+        function setResultSymbols(result) {
+            return gameManager.setResultSymbols(result);
+        }
+
+        // リール回転アニメーション
+        function animateReel(reelIndex, finalSymbol, duration) {
+            return new Promise((resolve) => {
+                const symbolsContainer = document.getElementById(`symbols${reelIndex}`);
+                const symbolHeight = symbolsContainer.children[0].offsetHeight; // シンボルの高さを動的に取得
+                const currentConfig = gameManager.getCurrentConfig();
+                const animationSpeed = currentConfig.gameSettings.animationSpeed || 20; // デフォルト20ms
+
+                // スクロールする距離を計算 (最低でも2周分)
+                const scrollDistance = (symbolsContainer.children.length * symbolHeight) + (symbolsContainer.children.length * symbolHeight); // 2周分
+
+                let startTime = null;
+
+                function animate(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+
+                    // イージング関数 (加速して減速)
+                    const easedProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+
+                    const currentPosition = -scrollDistance * easedProgress;
+                    symbolsContainer.style.transform = `translateY(${currentPosition}px)`;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
                     } else {
-                        spinButton.disabled = false; // テストモードでは再度スピン可能に
+                        // アニメーション終了後、最終シンボルを配置
+                        symbolsContainer.innerHTML = ''; // 一度クリア
+                        // 最終シンボルを先頭に追加
+                        const finalSymbolDiv = document.createElement('div');
+                        finalSymbolDiv.className = 'symbol';
+                        finalSymbolDiv.textContent = finalSymbol;
+                        symbolsContainer.appendChild(finalSymbolDiv);
+
+                        // 残りのシンボルをランダムに追加してリールを埋める
+                        const symbols = currentConfig.symbols;
+                        for (let j = 0; j < 10; j++) { // 適当な数で埋める
+                            const symbolDiv = document.createElement('div');
+                            symbolDiv.className = 'symbol';
+                            symbolDiv.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                            symbolsContainer.appendChild(symbolDiv);
+                        }
+                        symbolsContainer.style.transform = 'translateY(0px)'; // 位置をリセット
+                        resolve();
                     }
-                }, currentConfig.gameSettings.spinDuration + (reels.length * currentConfig.gameSettings.reelStopDelay));
+                }
+                requestAnimationFrame(animate);
             });
-        });
-    </script>
-</body>
-</html>
+        }
+
+        // ジャックポット効果
+        function showJackpotEffect() {
+            const effect = document.createElement('div');
+            effect.className = 'jackpot-effect';
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            },
