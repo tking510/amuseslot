@@ -1,38 +1,113 @@
 {
-  "default": {
-    "probabilities": {
-      "jackpot": 0.01,
-      "bigWin": 0.05,
-      "smallWin": 0.15,
-      "lose": 0.79
+    "patterns": {
+        "default": {
+            "probabilities": {
+                "jackpot": 0.01,
+                "bigWin": 0.05,
+                "smallWin": 0.15,
+                "lose": 0.79
+            },
+            "winPatterns": {
+                "jackpot": {
+                    "message": "🎉 JACKPOT! 🎉",
+                    "codePrefix": "JP",
+                    "multiplier": 1000,
+                    "description": "全て同じ絵柄",
+                    "fixedCode": ""
+                },
+                "bigWin": {
+                    "message": "🎊 BIG WIN! 🎊",
+                    "codePrefix": "BW",
+                    "multiplier": 100,
+                    "description": "2つ同じ絵柄",
+                    "fixedCode": ""
+                },
+                "smallWin": {
+                    "message": "✨ WIN! ✨",
+                    "codePrefix": "SW",
+                    "multiplier": 10,
+                    "description": "特定の組み合わせ",
+                    "fixedCode": ""
+                },
+                "lose": {
+                    "message": "残念！もう一度チャレンジ！",
+                    "codePrefix": "LOSE",
+                    "multiplier": 0,
+                    "description": "ハズレ",
+                    "fixedCode": ""
+                }
+            },
+            "symbols": [
+                "🍒",
+                "🍋",
+                "🍊",
+                "🍇",
+                "🔔",
+                "⭐",
+                "💎",
+                "7️⃣"
+            ],
+            "gameSettings": {
+                "spinDuration": 2000,
+                "reelStopDelay": 500,
+                "animationSpeed": 20,
+                "logoUrl": ""
+            }
+        },
+        "pattern_high_jp": {
+            "probabilities": {
+                "jackpot": 0.05,
+                "bigWin": 0.10,
+                "smallWin": 0.20,
+                "lose": 0.65
+            },
+            "winPatterns": {
+                "jackpot": {
+                    "message": "🎉 SUPER JACKPOT! 🎉",
+                    "codePrefix": "SJP",
+                    "multiplier": 2000,
+                    "description": "全て同じ絵柄 (高確率)",
+                    "fixedCode": ""
+                },
+                "bigWin": {
+                    "message": "🎊 GREAT WIN! 🎊",
+                    "codePrefix": "GBW",
+                    "multiplier": 150,
+                    "description": "2つ同じ絵柄 (高確率)",
+                    "fixedCode": ""
+                },
+                "smallWin": {
+                    "message": "✨ NICE WIN! ✨",
+                    "codePrefix": "NSW",
+                    "multiplier": 20,
+                    "description": "特定の組み合わせ (高確率)",
+                    "fixedCode": ""
+                },
+                "lose": {
+                    "message": "惜しい！次こそ！",
+                    "codePrefix": "LOSE_H",
+                    "multiplier": 0,
+                    "description": "ハズレ (高確率)",
+                    "fixedCode": ""
+                }
+            },
+            "symbols": [
+                "🍒",
+                "🍋",
+                "🍊",
+                "🍇",
+                "🔔",
+                "⭐",
+                "💎",
+                "7️⃣"
+            ],
+            "gameSettings": {
+                "spinDuration": 1800,
+                "reelStopDelay": 400,
+                "animationSpeed": 18,
+                "logoUrl": ""
+            }
+        }
     },
-    "bonusCodes": {
-      "jackpot": "JP_BONUS_CODE",
-      "bigWin": "BW_REWARD_CODE",
-      "smallWin": "SW_GIFT_CODE",
-      "lose": "LOSE_TRY_AGAIN"
-    },
-    "symbols": ["🍒", "🍊", "🍇", "🔔", "⭐", "7️⃣"],
-    "gameSettings": {
-      "spinDuration": 2000,
-      "reelStopDelay": 300
-    },
-    "winPatterns": {
-      "jackpot": {
-        "message": "🎉 JACKPOT! 🎉",
-        "codePrefix": "JP",
-        "description": "3つ揃い"
-      },
-      "bigWin": {
-        "message": "🎊 BIG WIN! 🎊",
-        "codePrefix": "BW",
-        "description": "2つ同じ絵柄"
-      },
-      "smallWin": {
-        "message": "✨ WIN! ✨",
-        "codePrefix": "SW",
-        "description": "特定の組み合わせ"
-      }
-    }
-  }
+    "activePatternId": "default"
 }
