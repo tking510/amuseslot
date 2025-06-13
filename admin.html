@@ -4,190 +4,143 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎰 スロットゲーム管理画面</title>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
-            min-height: 100vh;
+            margin: 0;
             padding: 20px;
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-
-        .header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 30px;
+        h1 {
+            color: #2c3e50;
             text-align: center;
         }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            opacity: 0.8;
-            font-size: 1.1em;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        .section {
-            margin-bottom: 40px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 5px solid #3498db;
-        }
-
-        .section h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-
         .btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #3498db;
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 10px 15px;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-            display: inline-block;
-            text-decoration: none;
+            margin: 10px 0;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🎰 スロットゲーム管理画面</h1>
-            <p>確率設定・統計管理・コード履歴</p>
-        </div>
-
-        <div class="content">
-            <div class="section">
-                <h2>⚠️ 管理画面の読み込みに問題が発生しています</h2>
-                <p>以下の理由により管理画面が正しく表示されていない可能性があります：</p>
-                <ul style="margin: 20px 0; line-height: 1.6;">
-                    <li>JavaScriptファイル（game-manager.js）の読み込みエラー</li>
-                    <li>設定ファイル（config.json）の読み込みエラー</li>
-                    <li>ブラウザのキャッシュ問題</li>
-                </ul>
-                
-                <p><strong>解決策：</strong></p>
-                <ol style="margin: 20px 0; line-height: 1.6;">
-                    <li>ブラウザのキャッシュをクリア（Ctrl+F5またはCmd+Shift+R）</li>
-                    <li>game-manager.jsファイルが正しくアップロードされているか確認</li>
-                    <li>config.jsonファイルが正しくアップロードされているか確認</li>
-                </ol>
-                
-                <a href="index.html" class="btn">メインゲーム画面に戻る</a>
-            </div>
-            
-            <div class="section">
-                <h2>🔧 手動デバッグ</h2>
-                <p>以下のボタンをクリックして、管理画面の初期化を試みてください：</p>
-                <button id="debugBtn" class="btn">管理画面を初期化</button>
-                <div id="debugResult" style="margin-top: 20px; padding: 15px; background: #f1f2f6; border-radius: 8px; display: none;"></div>
-            </div>
-        </div>
+        <h1>🎰 スロットゲーム管理画面</h1>
+        
+        <p>このページは管理画面の簡易版です。以下のボタンをクリックして、各機能をテストできます。</p>
+        
+        <button id="testConfigBtn" class="btn">設定ファイルをテスト</button>
+        <button id="testGameBtn" class="btn">ゲームマネージャーをテスト</button>
+        <button id="goToGameBtn" class="btn">メインゲーム画面へ</button>
+        
+        <div id="result" class="result" style="display:none;"></div>
     </div>
 
     <script>
-        document.getElementById('debugBtn').addEventListener('click', function() {
-            const debugResult = document.getElementById('debugResult');
-            debugResult.style.display = 'block';
+        // 結果表示用の関数
+        function showResult(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
+        }
+        
+        // 設定ファイルのテスト
+        document.getElementById('testConfigBtn').addEventListener('click', function() {
+            showResult('設定ファイルをテスト中...');
             
-            try {
-                // 基本情報の収集
-                const info = {
-                    url: window.location.href,
-                    path: window.location.pathname,
-                    userAgent: navigator.userAgent,
-                    screenSize: `${window.innerWidth}x${window.innerHeight}`,
-                    time: new Date().toISOString()
-                };
-                
-                // game-manager.jsの読み込み試行
-                const script = document.createElement('script');
-                script.src = './game-manager.js';
-                script.onload = function() {
-                    debugResult.innerHTML += '<p style="color: green;">✅ game-manager.js の読み込みに成功しました！</p>';
-                    
-                    // gameManagerオブジェクトの確認
-                    if (typeof gameManager !== 'undefined') {
-                        debugResult.innerHTML += '<p style="color: green;">✅ gameManagerオブジェクトが存在します</p>';
-                        
-                        // 設定ファイルの読み込み試行
-                        try {
-                            gameManager.loadConfig().then(() => {
-                                debugResult.innerHTML += '<p style="color: green;">✅ 設定ファイルの読み込みに成功しました！</p>';
-                                debugResult.innerHTML += '<p>5秒後に管理画面をリロードします...</p>';
-                                
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 5000);
-                            }).catch(err => {
-                                debugResult.innerHTML += `<p style="color: red;">❌ 設定ファイルの読み込みに失敗: ${err.message}</p>`;
-                            });
-                        } catch (e) {
-                            debugResult.innerHTML += `<p style="color: red;">❌ 設定ファイル読み込み処理でエラー: ${e.message}</p>`;
-                        }
-                    } else {
-                        debugResult.innerHTML += '<p style="color: red;">❌ gameManagerオブジェクトが見つかりません</p>';
+            fetch('./config.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                };
-                
-                script.onerror = function() {
-                    debugResult.innerHTML += '<p style="color: red;">❌ game-manager.js の読み込みに失敗しました</p>';
-                    debugResult.innerHTML += '<p>ファイルが存在するか確認してください。パス: ./game-manager.js</p>';
-                };
-                
-                document.head.appendChild(script);
-                
-                // 基本情報の表示
-                debugResult.innerHTML = `
-                    <h3>デバッグ情報</h3>
-                    <p>URL: ${info.url}</p>
-                    <p>パス: ${info.path}</p>
-                    <p>ブラウザ: ${info.userAgent}</p>
-                    <p>画面サイズ: ${info.screenSize}</p>
-                    <p>時刻: ${info.time}</p>
-                    <hr>
-                    <p>診断中...</p>
-                `;
-                
-            } catch (e) {
-                debugResult.innerHTML = `<p style="color: red;">エラーが発生しました: ${e.message}</p>`;
-            }
+                    return response.json();
+                })
+                .then(data => {
+                    showResult(`
+                        <h3>✅ 設定ファイルの読み込み成功!</h3>
+                        <p>確率設定:</p>
+                        <ul>
+                            <li>ジャックポット: ${data.probabilities.jackpot * 100}%</li>
+                            <li>ビッグウィン: ${data.probabilities.bigWin * 100}%</li>
+                            <li>スモールウィン: ${data.probabilities.smallWin * 100}%</li>
+                            <li>負け: ${data.probabilities.lose * 100}%</li>
+                        </ul>
+                        <p>シンボル数: ${data.symbols.length}</p>
+                    `);
+                })
+                .catch(error => {
+                    showResult(`
+                        <h3>❌ 設定ファイルの読み込み失敗</h3>
+                        <p>エラー: ${error.message}</p>
+                        <p>確認事項:</p>
+                        <ul>
+                            <li>config.jsonファイルが存在するか</li>
+                            <li>ファイル名が正確に「config.json」（小文字）になっているか</li>
+                            <li>JSONの構文が正しいか</li>
+                        </ul>
+                    `);
+                });
+        });
+        
+        // ゲームマネージャーのテスト
+        document.getElementById('testGameBtn').addEventListener('click', function() {
+            showResult('ゲームマネージャーをテスト中...');
+            
+            const script = document.createElement('script');
+            script.src = './game-manager.js';
+            
+            script.onload = function() {
+                if (typeof gameManager !== 'undefined') {
+                    showResult(`
+                        <h3>✅ ゲームマネージャーの読み込み成功!</h3>
+                        <p>gameManagerオブジェクトが存在します。</p>
+                    `);
+                } else {
+                    showResult(`
+                        <h3>⚠️ ゲームマネージャーは読み込まれましたが、gameManagerオブジェクトが見つかりません</h3>
+                        <p>game-manager.jsファイルの内容を確認してください。</p>
+                    `);
+                }
+            };
+            
+            script.onerror = function() {
+                showResult(`
+                    <h3>❌ ゲームマネージャーの読み込み失敗</h3>
+                    <p>game-manager.jsファイルが見つからないか、読み込めません。</p>
+                    <p>確認事項:</p>
+                    <ul>
+                        <li>game-manager.jsファイルが存在するか</li>
+                        <li>ファイル名が正確に「game-manager.js」（小文字、ハイフン付き）になっているか</li>
+                    </ul>
+                `);
+            };
+            
+            document.head.appendChild(script);
+        });
+        
+        // メインゲーム画面へのリンク
+        document.getElementById('goToGameBtn').addEventListener('click', function() {
+            window.location.href = './index.html';
         });
     </script>
 </body>
