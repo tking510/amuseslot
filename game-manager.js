@@ -12,6 +12,7 @@ class SlotGameManager {
             codesGenerated: []
         };
         this.loadConfig();
+        this.loadSavedConfig(); // ローカルストレージから設定と統計を読み込む
     }
 
     // 設定ファイルの読み込み
@@ -36,19 +37,29 @@ class SlotGameManager {
                         message: "🎉 JACKPOT! 🎉",
                         codePrefix: "JP",
                         multiplier: 1000,
-                        description: "全て同じ絵柄"
+                        description: "全て同じ絵柄",
+                        fixedCode: ""
                     },
                     bigWin: {
                         message: "🎊 BIG WIN! 🎊",
                         codePrefix: "BW",
                         multiplier: 100,
-                        description: "2つ同じ絵柄"
+                        description: "2つ同じ絵柄",
+                        fixedCode: ""
                     },
                     smallWin: {
                         message: "✨ WIN! ✨",
                         codePrefix: "SW",
                         multiplier: 10,
-                        description: "特定の組み合わせ"
+                        description: "特定の組み合わせ",
+                        fixedCode: ""
+                    },
+                    lose: {
+                        message: "残念！もう一度チャレンジ！",
+                        codePrefix: "LOSE",
+                        multiplier: 0,
+                        description: "ハズレ",
+                        fixedCode: ""
                     }
                 },
                 symbols: ['🍒', '🍋', '🍊', '🍇', '🔔', '⭐', '💎', '7️⃣'],
@@ -66,6 +77,16 @@ class SlotGameManager {
         if (this.config) {
             this.config.probabilities = { ...this.config.probabilities, ...newProbabilities };
             console.log('確率が更新されました:', this.config.probabilities);
+            this.saveConfig();
+        }
+    }
+
+    // ボーナスコードの更新
+    updateBonusCode(type, newCode) {
+        if (this.config && this.config.winPatterns[type]) {
+            this.config.winPatterns[type].fixedCode = newCode;
+            console.log(`${type}のボーナスコードが更新されました: ${newCode}`);
+            this.saveConfig();
         }
     }
 
@@ -85,22 +106,21 @@ class SlotGameManager {
         return 'lose'; // フォールバック
     }
 
-    // より高度なコード生成
+    // コード生成
     generateCode(type) {
         const pattern = this.config.winPatterns[type];
         if (!pattern) return null;
 
+        // 固定コードが設定されていればそれを使用
+        if (pattern.fixedCode && pattern.fixedCode !== "") {
+            return pattern.fixedCode;
+        }
+
+        // 固定コードがなければ動的に生成
         const timestamp = Date.now().toString().slice(-6);
         const random = Math.random().toString(36).substring(2, 6).toUpperCase();
         const checksum = this.calculateChecksum(timestamp + random);
         const code = `${pattern.codePrefix}${timestamp}${random}${checksum}`;
-        
-        // 統計に記録
-        this.statistics.codesGenerated.push({
-            code: code,
-            type: type,
-            timestamp: new Date().toISOString()
-        });
         
         return code;
     }
@@ -201,11 +221,18 @@ class SlotGameManager {
     }
 
     // 統計の更新
-    updateStatistics(result) {
+    updateStatistics(result, generatedCode) {
         this.statistics.totalSpins++;
         if (result !== 'lose') {
             this.statistics.wins[result]++;
         }
+        // コード履歴に記録
+        this.statistics.codesGenerated.push({
+            code: generatedCode,
+            type: result,
+            timestamp: new Date().toISOString()
+        });
+        this.saveStatistics();
     }
 
     // 統計の取得
@@ -219,13 +246,17 @@ class SlotGameManager {
         };
     }
 
-    // 設定の保存（ローカルストレージ）
+    // 設定と統計の保存（ローカルストレージ）
     saveConfig() {
         localStorage.setItem('slotGameConfig', JSON.stringify(this.config));
-        localStorage.setItem('slotGameStats', JSON.stringify(this.statistics));
     }
 
-    // 設定の読み込み（ローカルストレージ）
+    saveStatistics() {
+        localStorage.setItem('slotGameStats', JSON.stringify(this.statistics));
+        localStorage.setItem('slotGamePlayed', 'true'); // プレイ済みフラグを設定
+    }
+
+    // 設定と統計の読み込み（ローカルストレージ）
     loadSavedConfig() {
         const savedConfig = localStorage.getItem('slotGameConfig');
         const savedStats = localStorage.getItem('slotGameStats');
@@ -237,6 +268,21 @@ class SlotGameManager {
         if (savedStats) {
             this.statistics = JSON.parse(savedStats);
         }
+    }
+
+    // ユーザーが既にプレイしたかどうかのチェック
+    hasPlayed() {
+        return localStorage.getItem('slotGamePlayed') === 'true';
+    }
+
+    // ユーザーがプレイしたことを記録
+    setPlayed() {
+        localStorage.setItem('slotGamePlayed', 'true');
+    }
+
+    // プレイ済みフラグをリセット（デバッグ用など）
+    resetPlayed() {
+        localStorage.removeItem('slotGamePlayed');
     }
 }
 
