@@ -2,6 +2,7 @@
 class SlotGameManager {
     constructor() {
         this.config = null;
+        this.activePatternId = 'default'; // 現在アクティブな確率パターンID
         this.statistics = {
             totalSpins: 0,
             wins: {
@@ -20,204 +21,116 @@ class SlotGameManager {
         try {
             // 動的に生成されたベースパスを使用
             const response = await fetch(window.basePath + 'config.json');
-            this.config = await response.json();
+            const fetchedConfig = await response.json();
+
+            // config.jsonが古い形式の場合、新しい形式に変換
+            if (fetchedConfig.probabilities && !fetchedConfig.patterns) {
+                this.config = {
+                    patterns: {
+                        'default': {
+                            probabilities: fetchedConfig.probabilities,
+                            bonusCodes: {
+                                jackpot: '',
+                                bigWin: '',
+                                smallWin: '',
+                                lose: ''
+                            }
+                        }
+                    },
+                    symbols: fetchedConfig.symbols,
+                    gameSettings: fetchedConfig.gameSettings
+                };
+                console.warn('config.jsonが古い形式です。新しい形式に変換しました。');
+            } else {
+                this.config = fetchedConfig;
+            }
+
+            // アクティブなパターンIDをURLパラメータから取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const patternId = urlParams.get('pattern');
+            if (patternId && this.config.patterns[patternId]) {
+                this.activePatternId = patternId;
+                console.log(`アクティブな確率パターン: ${this.activePatternId}`);
+            } else {
+                this.activePatternId = 'default';
+                console.log('デフォルトの確率パターンを使用します。');
+            }
+
             console.log('設定ファイルが読み込まれました:', this.config);
         } catch (error) {
             console.error('設定ファイルの読み込みに失敗しました:', error);
             // デフォルト設定を使用
             this.config = {
-                probabilities: {
-                    jackpot: 0.01,
-                    bigWin: 0.05,
-                    smallWin: 0.15,
-                    lose: 0.79
-                },
-                winPatterns: {
-                    jackpot: {
-                        message: "🎉 JACKPOT! 🎉",
-                        codePrefix: "JP",
-                        multiplier: 1000,
-                        description: "全て同じ絵柄",
-                        fixedCode: ""
-                    },
-                    bigWin: {
-                        message: "🎊 BIG WIN! 🎊",
-                        codePrefix: "BW",
-                        multiplier: 100,
-                        description: "2つ同じ絵柄",
-                        fixedCode: ""
-                    },
-                    smallWin: {
-                        message: "✨ WIN! ✨",
-                        codePrefix: "SW",
-                        multiplier: 10,
-                        description: "特定の組み合わせ",
-                        fixedCode: ""
-                    },
-                    lose: {
-                        message: "残念！もう一度チャレンジ！",
-                        codePrefix: "LOSE",
-                        multiplier: 0,
-                        description: "ハズレ",
-                        fixedCode: ""
+                patterns: {
+                    'default': {
+                        probabilities: {
+                            jackpot: 0.01,
+                            bigWin: 0.05,
+                            smallWin: 0.15,
+                            lose: 0.79
+                        },
+                        bonusCodes: {
+                            jackpot: 'JP_DEFAULT',
+                            bigWin: 'BW_DEFAULT',
+                            smallWin: 'SW_DEFAULT',
+                            lose: 'LOSE_DEFAULT'
+                        }
                     }
                 },
-                symbols: ['🍒', '🍋', '🍊', '🍇', '🔔', '⭐', '💎', '7️⃣'],
+                symbols: ["🍒", "🍋", "🍊", "🍇", "🔔", "⭐", "💎", "7️⃣"],
                 gameSettings: {
                     spinDuration: 2000,
                     reelStopDelay: 500,
                     animationSpeed: 20
                 }
             };
+            console.warn('デフォルト設定を使用しました。');
         }
     }
 
-    // 確率設定の更新
-    updateProbabilities(newProbabilities) {
-        if (this.config) {
-            this.config.probabilities = { ...this.config.probabilities, ...newProbabilities };
-            console.log('確率が更新されました:', this.config.probabilities);
-            this.saveConfig();
-        }
+    // 現在アクティブな確率パターンを取得
+    getCurrentProbabilities() {
+        return this.config.patterns[this.activePatternId].probabilities;
     }
 
-    // ボーナスコードの更新
-    updateBonusCode(type, newCode) {
-        if (this.config && this.config.winPatterns[type]) {
-            this.config.winPatterns[type].fixedCode = newCode;
-            console.log(`${type}のボーナスコードが更新されました: ${newCode}`);
-            this.saveConfig();
-        }
+    // 現在アクティブなボーナスコードを取得
+    getCurrentBonusCodes() {
+        return this.config.patterns[this.activePatternId].bonusCodes;
     }
 
-    // 当選判定（重み付きランダム）
+    // スピン結果の決定
     determineResult() {
+        const probs = this.getCurrentProbabilities();
         const rand = Math.random();
-        const probs = this.config.probabilities;
-        
-        let cumulative = 0;
-        for (const [type, probability] of Object.entries(probs)) {
-            cumulative += probability;
-            if (rand < cumulative) {
-                return type;
+        let cumulativeProbability = 0;
+
+        if (rand < (cumulativeProbability += probs.jackpot)) {
+            return 'jackpot';
+        } else if (rand < (cumulativeProbability += probs.bigWin)) {
+            return 'bigWin';
+        } else if (rand < (cumulativeProbability += probs.smallWin)) {
+            return 'smallWin';
+        } else {
+            return 'lose';
+        }
+    }
+
+    // コードの生成
+    generateCode(resultType) {
+        const bonusCodes = this.getCurrentBonusCodes();
+        const fixedCode = bonusCodes[resultType];
+
+        if (fixedCode) {
+            return fixedCode; // 固定コードがあればそれを返す
+        } else {
+            // 以前のランダムコード生成ロジック（フォールバック）
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 10; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
             }
+            return `${this.config.winPatterns[resultType].codePrefix || 'CODE'}-${code}`;
         }
-        
-        return 'lose'; // フォールバック
-    }
-
-    // コード生成
-    generateCode(type) {
-        const pattern = this.config.winPatterns[type];
-        if (!pattern) return null;
-
-        // 固定コードが設定されていればそれを使用
-        if (pattern.fixedCode && pattern.fixedCode !== "") {
-            return pattern.fixedCode;
-        }
-
-        // 固定コードがなければ動的に生成
-        const timestamp = Date.now().toString().slice(-6);
-        const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-        const checksum = this.calculateChecksum(timestamp + random);
-        const code = `${pattern.codePrefix}${timestamp}${random}${checksum}`;
-        
-        return code;
-    }
-
-    // チェックサム計算（簡単な検証用）
-    calculateChecksum(str) {
-        let sum = 0;
-        for (let i = 0; i < str.length; i++) {
-            sum += str.charCodeAt(i);
-        }
-        return (sum % 36).toString(36).toUpperCase();
-    }
-
-    // 結果に基づくシンボル設定
-    setResultSymbols(result) {
-        const symbols = this.config.symbols;
-        let finalSymbols = [];
-        
-        switch (result) {
-            case 'jackpot':
-                // 全て同じシンボル（高価値シンボル優先）
-                const jackpotSymbol = this.getHighValueSymbol();
-                finalSymbols = [jackpotSymbol, jackpotSymbol, jackpotSymbol];
-                break;
-                
-            case 'bigWin':
-                // 2つ同じシンボル
-                const winSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                const otherSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                finalSymbols = [winSymbol, winSymbol, otherSymbol];
-                break;
-                
-            case 'smallWin':
-                // 特定の組み合わせパターン
-                const smallWinPatterns = [
-                    ['🍒', '🍋', '🍒'],
-                    ['🔔', '🔔', '⭐'],
-                    ['🍇', '🍊', '🍇']
-                ];
-                finalSymbols = smallWinPatterns[Math.floor(Math.random() * smallWinPatterns.length)];
-                break;
-                
-            default:
-                // ランダム（ハズレ）
-                finalSymbols = this.generateLosingCombination();
-                break;
-        }
-        
-        return finalSymbols;
-    }
-
-    // 高価値シンボルの取得
-    getHighValueSymbol() {
-        const highValueSymbols = ['💎', '7️⃣', '⭐'];
-        return highValueSymbols[Math.floor(Math.random() * highValueSymbols.length)];
-    }
-
-    // ハズレの組み合わせ生成
-    generateLosingCombination() {
-        const symbols = this.config.symbols;
-        let combination;
-        
-        do {
-            combination = [
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)]
-            ];
-        } while (this.isWinningCombination(combination));
-        
-        return combination;
-    }
-
-    // 当選組み合わせかどうかの判定
-    isWinningCombination(symbols) {
-        // 全て同じ
-        if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
-            return true;
-        }
-        
-        // 2つ同じ
-        if (symbols[0] === symbols[1] || symbols[1] === symbols[2] || symbols[0] === symbols[2]) {
-            return true;
-        }
-        
-        // 特定のパターン
-        const winPatterns = [
-            ['🍒', '🍋', '🍒'],
-            ['🔔', '🔔', '⭐'],
-            ['🍇', '🍊', '🍇']
-        ];
-        
-        return winPatterns.some(pattern => 
-            pattern[0] === symbols[0] && 
-            pattern[1] === symbols[1] && 
-            pattern[2] === symbols[2]
-        );
     }
 
     // 統計の更新
@@ -226,11 +139,11 @@ class SlotGameManager {
         if (result !== 'lose') {
             this.statistics.wins[result]++;
         }
-        // コード履歴に記録
         this.statistics.codesGenerated.push({
-            code: generatedCode,
             type: result,
-            timestamp: new Date().toISOString()
+            code: generatedCode,
+            timestamp: new Date().toISOString(),
+            pattern: this.activePatternId // どのパターンで生成されたか記録
         });
         this.saveStatistics();
     }
@@ -247,23 +160,14 @@ class SlotGameManager {
     }
 
     // 設定と統計の保存（ローカルストレージ）
-    saveConfig() {
-        localStorage.setItem('slotGameConfig', JSON.stringify(this.config));
-    }
-
     saveStatistics() {
         localStorage.setItem('slotGameStats', JSON.stringify(this.statistics));
-        localStorage.setItem('slotGamePlayed', 'true'); // プレイ済みフラグを設定
+        // localStorage.setItem('slotGamePlayed', 'true'); // プレイ済みフラグは別途管理
     }
 
     // 設定と統計の読み込み（ローカルストレージ）
     loadSavedConfig() {
-        const savedConfig = localStorage.getItem('slotGameConfig');
         const savedStats = localStorage.getItem('slotGameStats');
-        
-        if (savedConfig) {
-            this.config = JSON.parse(savedConfig);
-        }
         
         if (savedStats) {
             this.statistics = JSON.parse(savedStats);
@@ -272,17 +176,48 @@ class SlotGameManager {
 
     // ユーザーが既にプレイしたかどうかのチェック
     hasPlayed() {
-        return localStorage.getItem('slotGamePlayed') === 'true';
+        // 現在のパターンIDと日付を組み合わせたキーを使用
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        return localStorage.getItem(`slotGamePlayed_${this.activePatternId}_${today}`) === 'true';
     }
 
     // ユーザーがプレイしたことを記録
     setPlayed() {
-        localStorage.setItem('slotGamePlayed', 'true');
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem(`slotGamePlayed_${this.activePatternId}_${today}`, 'true');
     }
 
     // プレイ済みフラグをリセット（デバッグ用など）
     resetPlayed() {
-        localStorage.removeItem('slotGamePlayed');
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.removeItem(`slotGamePlayed_${this.activePatternId}_${today}`);
+    }
+
+    // 新しい確率パターンを追加/更新
+    updatePattern(patternId, probabilities, bonusCodes) {
+        if (!this.config.patterns) {
+            this.config.patterns = {};
+        }
+        this.config.patterns[patternId] = {
+            probabilities: probabilities,
+            bonusCodes: bonusCodes
+        };
+        // config.jsonを更新するAPIがないため、ローカルストレージに保存するなどの対応が必要になる
+        // 現状はメモリ上のconfigを更新するのみ
+        console.log(`パターン ${patternId} を更新しました:`, this.config.patterns[patternId]);
+    }
+
+    // パターンを削除
+    deletePattern(patternId) {
+        if (this.config.patterns[patternId]) {
+            delete this.config.patterns[patternId];
+            console.log(`パターン ${patternId} を削除しました。`);
+        }
+    }
+
+    // 全てのパターンを取得
+    getAllPatterns() {
+        return this.config.patterns;
     }
 }
 
