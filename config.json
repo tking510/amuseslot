@@ -12,7 +12,18 @@
       "multiplier": 1000,
       "description": "全て同じ絵柄"
     },
-    // 他の当選パターン
+    "bigWin": {
+      "message": "🎊 BIG WIN! 🎊",
+      "codePrefix": "BW",
+      "multiplier": 100,
+      "description": "2つ同じ絵柄"
+    },
+    "smallWin": {
+      "message": "✨ WIN! ✨",
+      "codePrefix": "SW",
+      "multiplier": 10,
+      "description": "特定の組み合わせ"
+    }
   },
   "symbols": ["🍒", "🍋", "🍊", "🍇", "🔔", "⭐", "💎", "7️⃣"],
   "gameSettings": {
