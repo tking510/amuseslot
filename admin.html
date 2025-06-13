@@ -4,27 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎰 スロットゲーム管理画面</title>
+    
+    <!-- 動的ベースパスの設定 -->
+    <script>
+        console.log("管理画面読み込み開始");
+        // 現在のURLからベースパスを動的に取得
+        window.basePath = window.location.pathname.replace(/\/[^\/]*$/, '/');
+        console.log("ベースパス:", window.basePath);
+    </script>
+    
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
-            margin: 0;
+            min-height: 100vh;
             padding: 20px;
         }
+
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
         }
-        h1 {
-            color: #2c3e50;
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
             text-align: center;
         }
-        .btn {
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .probability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .probability-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
             background: #3498db;
             color: white;
             border: none;
@@ -32,115 +105,500 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            margin: 10px 0;
+            margin-top: 10px;
+            transition: background 0.3s;
         }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
             border-radius: 5px;
-            border-left: 5px solid #3498db;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .code-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .tab-container {
+            margin-top: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: none;
+            margin-right: 5px;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .tab-button.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            color: #666;
+        }
+
+        .game-preview {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            background: #f8f9fa;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .probability-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .section {
+                padding: 15px;
+            }
         }
     </style>
+    
+    <!-- game-manager.jsの読み込み -->
+    <script src="./game-manager.js" defer></script>
 </head>
 <body>
     <div class="container">
-        <h1>🎰 スロットゲーム管理画面</h1>
-        
-        <p>このページは管理画面の簡易版です。以下のボタンをクリックして、各機能をテストできます。</p>
-        
-        <button id="testConfigBtn" class="btn">設定ファイルをテスト</button>
-        <button id="testGameBtn" class="btn">ゲームマネージャーをテスト</button>
-        <button id="goToGameBtn" class="btn">メインゲーム画面へ</button>
-        
-        <div id="result" class="result" style="display:none;"></div>
-    </div>
+        <div class="header">
+            <h1>🎰 スロットゲーム管理画面</h1>
+            <p>確率設定・統計管理・コード履歴</p>
+        </div>
 
+        <div class="content">
+            <!-- 確率設定セクション -->
+            <div class="section">
+                <h2>⚙️ 確率設定</h2>
+                <div id="probabilityAlert"></div>
+                
+                <div class="probability-grid">
+                    <div class="probability-item">
+                        <label for="jackpotProb">ジャックポット確率 (%)</label>
+                        <input type="number" id="jackpotProb" min="0" max="100" step="0.1">
+                    </div>
+                    
+                    <div class="probability-item">
+                        <label for="bigWinProb">ビッグウィン確率 (%)</label>
+                        <input type="number" id="bigWinProb" min="0" max="100" step="0.1">
+                    </div>
+                    
+                    <div class="probability-item">
+                        <label for="smallWinProb">スモールウィン確率 (%)</label>
+                        <input type="number" id="smallWinProb" min="0" max="100" step="0.1">
+                    </div>
+                    
+                    <div class="probability-item">
+                        <label for="loseProb">負け確率 (%)</label>
+                        <input type="number" id="loseProb" min="0" max="100" step="0.1" readonly>
+                    </div>
+                </div>
+                
+                <button id="saveProbabilities" class="btn-primary">確率設定を保存</button>
+                <button id="resetProbabilities" class="btn-warning">デフォルトに戻す</button>
+            </div>
+            
+            <!-- 統計情報セクション -->
+            <div class="section">
+                <h2>📊 統計情報</h2>
+                
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="summary">サマリー</button>
+                        <button class="tab-button" data-tab="details">詳細データ</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="summary">
+                        <table>
+                            <tr>
+                                <th>項目</th>
+                                <th>値</th>
+                            </tr>
+                            <tr>
+                                <td>総プレイ回数</td>
+                                <td id="totalPlays">0</td>
+                            </tr>
+                            <tr>
+                                <td>ジャックポット回数</td>
+                                <td id="jackpotWins">0</td>
+                            </tr>
+                            <tr>
+                                <td>ビッグウィン回数</td>
+                                <td id="bigWins">0</td>
+                            </tr>
+                            <tr>
+                                <td>スモールウィン回数</td>
+                                <td id="smallWins">0</td>
+                            </tr>
+                            <tr>
+                                <td>勝率</td>
+                                <td id="winRate">0%</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="tab-content" id="details">
+                        <p>詳細データはまだ実装されていません。</p>
+                    </div>
+                </div>
+                
+                <button id="resetStats" class="btn-danger">統計をリセット</button>
+            </div>
+            
+            <!-- コード履歴セクション -->
+            <div class="section">
+                <h2>🎟️ コード履歴</h2>
+                
+                <div class="code-list">
+                    <table id="codeTable">
+                        <thead>
+                            <tr>
+                                <th>コード</th>
+                                <th>タイプ</th>
+                                <th>日時</th>
+                            </tr>
+                        </thead>
+                        <tbody id="codeTableBody">
+                            <!-- コードデータがここに入ります -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="exportCodes" class="btn-success">CSVエクスポート</button>
+                    <button id="clearCodes" class="btn-danger">履歴クリア</button>
+                </div>
+            </div>
+            
+            <!-- ゲームプレビューセクション -->
+            <div class="section">
+                <h2>🎮 ゲームプレビュー</h2>
+                
+                <button id="openGame" class="btn-primary">ゲームを新しいタブで開く</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>MEGA SLOT 管理システム v1.0</p>
+        </div>
+    </div>
+    
     <script>
-        // 結果表示用の関数
-        function showResult(message) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = message;
-            resultDiv.style.display = 'block';
-        }
-        
-        // 設定ファイルのテスト
-        document.getElementById('testConfigBtn').addEventListener('click', function() {
-            showResult('設定ファイルをテスト中...');
-            
-            fetch('./config.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    showResult(`
-                        <h3>✅ 設定ファイルの読み込み成功!</h3>
-                        <p>確率設定:</p>
-                        <ul>
-                            <li>ジャックポット: ${data.probabilities.jackpot * 100}%</li>
-                            <li>ビッグウィン: ${data.probabilities.bigWin * 100}%</li>
-                            <li>スモールウィン: ${data.probabilities.smallWin * 100}%</li>
-                            <li>負け: ${data.probabilities.lose * 100}%</li>
-                        </ul>
-                        <p>シンボル数: ${data.symbols.length}</p>
-                    `);
-                })
-                .catch(error => {
-                    showResult(`
-                        <h3>❌ 設定ファイルの読み込み失敗</h3>
-                        <p>エラー: ${error.message}</p>
-                        <p>確認事項:</p>
-                        <ul>
-                            <li>config.jsonファイルが存在するか</li>
-                            <li>ファイル名が正確に「config.json」（小文字）になっているか</li>
-                            <li>JSONの構文が正しいか</li>
-                        </ul>
-                    `);
-                });
-        });
-        
-        // ゲームマネージャーのテスト
-        document.getElementById('testGameBtn').addEventListener('click', function() {
-            showResult('ゲームマネージャーをテスト中...');
-            
-            const script = document.createElement('script');
-            script.src = './game-manager.js';
-            
-            script.onload = function() {
-                if (typeof gameManager !== 'undefined') {
-                    showResult(`
-                        <h3>✅ ゲームマネージャーの読み込み成功!</h3>
-                        <p>gameManagerオブジェクトが存在します。</p>
-                    `);
+        document.addEventListener('DOMContentLoaded', function() {
+            // 確率設定の初期化
+            function initProbabilities() {
+                if (typeof gameManager !== 'undefined' && gameManager.config) {
+                    document.getElementById('jackpotProb').value = (gameManager.config.probabilities.jackpot * 100).toFixed(1);
+                    document.getElementById('bigWinProb').value = (gameManager.config.probabilities.bigWin * 100).toFixed(1);
+                    document.getElementById('smallWinProb').value = (gameManager.config.probabilities.smallWin * 100).toFixed(1);
+                    document.getElementById('loseProb').value = (gameManager.config.probabilities.lose * 100).toFixed(1);
                 } else {
-                    showResult(`
-                        <h3>⚠️ ゲームマネージャーは読み込まれましたが、gameManagerオブジェクトが見つかりません</h3>
-                        <p>game-manager.jsファイルの内容を確認してください。</p>
-                    `);
+                    console.error('gameManager または config が見つかりません');
+                    showAlert('gameManagerの読み込みに失敗しました。ページを再読み込みしてください。', 'danger');
                 }
-            };
+            }
             
-            script.onerror = function() {
-                showResult(`
-                    <h3>❌ ゲームマネージャーの読み込み失敗</h3>
-                    <p>game-manager.jsファイルが見つからないか、読み込めません。</p>
-                    <p>確認事項:</p>
-                    <ul>
-                        <li>game-manager.jsファイルが存在するか</li>
-                        <li>ファイル名が正確に「game-manager.js」（小文字、ハイフン付き）になっているか</li>
-                    </ul>
-                `);
-            };
+            // 統計情報の初期化
+            function initStatistics() {
+                if (typeof gameManager !== 'undefined' && gameManager.statistics) {
+                    document.getElementById('totalPlays').textContent = gameManager.statistics.totalPlays;
+                    document.getElementById('jackpotWins').textContent = gameManager.statistics.wins.jackpot;
+                    document.getElementById('bigWins').textContent = gameManager.statistics.wins.bigWin;
+                    document.getElementById('smallWins').textContent = gameManager.statistics.wins.smallWin;
+                    
+                    const totalWins = gameManager.statistics.wins.jackpot + 
+                                     gameManager.statistics.wins.bigWin + 
+                                     gameManager.statistics.wins.smallWin;
+                    
+                    const winRate = gameManager.statistics.totalPlays > 0 
+                        ? ((totalWins / gameManager.statistics.totalPlays) * 100).toFixed(1) 
+                        : '0.0';
+                    
+                    document.getElementById('winRate').textContent = winRate + '%';
+                }
+            }
             
-            document.head.appendChild(script);
-        });
-        
-        // メインゲーム画面へのリンク
-        document.getElementById('goToGameBtn').addEventListener('click', function() {
-            window.location.href = './index.html';
+            // コード履歴の初期化
+            function initCodeHistory() {
+                if (typeof gameManager !== 'undefined' && gameManager.statistics && gameManager.statistics.codesGenerated) {
+                    const tableBody = document.getElementById('codeTableBody');
+                    tableBody.innerHTML = '';
+                    
+                    const codes = gameManager.statistics.codesGenerated;
+                    
+                    if (codes.length === 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = '<td colspan="3">履歴はありません</td>';
+                        tableBody.appendChild(row);
+                        return;
+                    }
+                    
+                    codes.forEach(code => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${code.code}</td>
+                            <td>${code.type}</td>
+                            <td>${code.timestamp}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                }
+            }
+            
+            // アラートの表示
+            function showAlert(message, type) {
+                const alertDiv = document.getElementById('probabilityAlert');
+                alertDiv.className = `alert alert-${type}`;
+                alertDiv.textContent = message;
+                
+                // 3秒後に消える
+                setTimeout(() => {
+                    alertDiv.textContent = '';
+                    alertDiv.className = '';
+                }, 3000);
+            }
+            
+            // 確率の合計が100%になるように調整
+            function updateLoseProbability() {
+                const jackpot = parseFloat(document.getElementById('jackpotProb').value) || 0;
+                const bigWin = parseFloat(document.getElementById('bigWinProb').value) || 0;
+                const smallWin = parseFloat(document.getElementById('smallWinProb').value) || 0;
+                
+                let lose = 100 - (jackpot + bigWin + smallWin);
+                lose = Math.max(0, lose); // 負の値にならないように
+                
+                document.getElementById('loseProb').value = lose.toFixed(1);
+                
+                return jackpot + bigWin + smallWin <= 100;
+            }
+            
+            // 確率設定の保存
+            document.getElementById('saveProbabilities').addEventListener('click', function() {
+                if (!updateLoseProbability()) {
+                    showAlert('勝率の合計が100%を超えています。調整してください。', 'danger');
+                    return;
+                }
+                
+                const jackpot = parseFloat(document.getElementById('jackpotProb').value) / 100;
+                const bigWin = parseFloat(document.getElementById('bigWinProb').value) / 100;
+                const smallWin = parseFloat(document.getElementById('smallWinProb').value) / 100;
+                const lose = parseFloat(document.getElementById('loseProb').value) / 100;
+                
+                if (typeof gameManager !== 'undefined') {
+                    gameManager.config.probabilities = {
+                        jackpot,
+                        bigWin,
+                        smallWin,
+                        lose
+                    };
+                    
+                    gameManager.saveConfig();
+                    showAlert('確率設定を保存しました', 'success');
+                } else {
+                    showAlert('gameManagerが見つかりません', 'danger');
+                }
+            });
+            
+            // 確率設定のリセット
+            document.getElementById('resetProbabilities').addEventListener('click', function() {
+                if (typeof gameManager !== 'undefined') {
+                    // デフォルト値に戻す
+                    gameManager.config.probabilities = {
+                        jackpot: 0.01,
+                        bigWin: 0.05,
+                        smallWin: 0.15,
+                        lose: 0.79
+                    };
+                    
+                    gameManager.saveConfig();
+                    initProbabilities();
+                    showAlert('確率設定をデフォルトに戻しました', 'success');
+                } else {
+                    showAlert('gameManagerが見つかりません', 'danger');
+                }
+            });
+
+            // 統計のリセット
+            document.getElementById('resetStats').addEventListener('click', function() {
+                if (typeof gameManager !== 'undefined') {
+                    gameManager.statistics = {
+                        totalSpins: 0,
+                        wins: {
+                            jackpot: 0,
+                            bigWin: 0,
+                            smallWin: 0
+                        },
+                        codesGenerated: []
+                    };
+                    gameManager.saveStatistics();
+                    initStatistics();
+                    initCodeHistory();
+                    showAlert('統計情報をリセットしました', 'success');
+                } else {
+                    showAlert('gameManagerが見つかりません', 'danger');
+                }
+            });
+
+            // コード履歴のエクスポート
+            document.getElementById('exportCodes').addEventListener('click', function() {
+                if (typeof gameManager !== 'undefined' && gameManager.statistics && gameManager.statistics.codesGenerated) {
+                    const codes = gameManager.statistics.codesGenerated;
+                    if (codes.length === 0) {
+                        showAlert('エクスポートするコードがありません', 'warning');
+                        return;
+                    }
+
+                    let csvContent = "data:text/csv;charset=utf-8,";
+                    csvContent += "コード,タイプ,日時\n";
+                    codes.forEach(code => {
+                        csvContent += `${code.code},${code.type},${code.timestamp}\n`;
+                    });
+
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', encodedUri);
+                    link.setAttribute('download', 'slot_codes.csv');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showAlert('コード履歴をCSVでエクスポートしました', 'success');
+                } else {
+                    showAlert('gameManagerが見つかりません', 'danger');
+                }
+            });
+
+            // コード履歴のクリア
+            document.getElementById('clearCodes').addEventListener('click', function() {
+                if (typeof gameManager !== 'undefined') {
+                    gameManager.statistics.codesGenerated = [];
+                    gameManager.saveStatistics();
+                    initCodeHistory();
+                    showAlert('コード履歴をクリアしました', 'success');
+                } else {
+                    showAlert('gameManagerが見つかりません', 'danger');
+                }
+            });
+
+            // ゲームを新しいタブで開く
+            document.getElementById('openGame').addEventListener('click', function() {
+                const gameUrl = window.location.origin + window.basePath + 'index.html';
+                window.open(gameUrl, '_blank');
+            });
+
+            // タブ切り替え機能
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                });
+            });
+
+            // 確率入力フィールドの変更を監視して負け確率を更新
+            document.getElementById('jackpotProb').addEventListener('input', updateLoseProbability);
+            document.getElementById('bigWinProb').addEventListener('input', updateLoseProbability);
+            document.getElementById('smallWinProb').addEventListener('input', updateLoseProbability);
+
+            // gameManagerがロードされた後に初期化処理を実行
+            const checkGameManagerInterval = setInterval(() => {
+                if (typeof gameManager !== 'undefined' && gameManager.config) {
+                    clearInterval(checkGameManagerInterval);
+                    initProbabilities();
+                    initStatistics();
+                    initCodeHistory();
+                    console.log("管理画面初期化完了");
+                }
+            }, 100);
         });
     </script>
 </body>
