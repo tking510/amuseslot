@@ -352,25 +352,28 @@
                 `;
                 
                 // 統計を更新
-                gameManager.updateStatistics(result);
+                gameManager.updateStatistics(result, code);
             } else {
+                const pattern = gameManager.config.winPatterns[result];
+                const code = generateCode(result);
                 resultDisplay.innerHTML = `
                     <div style="color: #ccc; font-size: 1.2em;">
-                        残念！もう一度チャレンジ！
+                        ${pattern.message}
                     </div>
+                    <div class="code-display">コード: ${code}</div>
                 `;
                 
                 // 統計を更新
-                gameManager.updateStatistics(result);
+                gameManager.updateStatistics(result, code);
             }
             
-            // 設定を保存
-            gameManager.saveConfig();
+            // プレイ済みフラグを設定
+            gameManager.setPlayed();
         }
 
         // メインのスピン関数
         async function spin() {
-            if (isSpinning) return;
+            if (isSpinning || gameManager.hasPlayed()) return;
             
             isSpinning = true;
             const spinButton = document.getElementById('spinButton');
@@ -401,8 +404,8 @@
                 displayResult(result, finalSymbols);
                 
                 // ボタンを再有効化
-                spinButton.disabled = false;
-                spinButton.textContent = '🎲 SPIN 🎲';
+                // spinButton.disabled = false; // 1回制限のため再有効化しない
+                spinButton.textContent = 'プレイ済み';
                 isSpinning = false;
             }, 500);
         }
@@ -424,6 +427,18 @@
             console.log("initializeReels completed.");
             gameManager.loadSavedConfig();
             console.log("gameManager.loadSavedConfig completed.");
+
+            // 1回プレイ制限のチェック
+            if (gameManager.hasPlayed()) {
+                const spinButton = document.getElementById('spinButton');
+                spinButton.disabled = true;
+                spinButton.textContent = 'プレイ済み';
+                document.getElementById('resultDisplay').innerHTML = `
+                    <div style="color: #ccc; font-size: 1.2em;">
+                        あなたは既にプレイしました。
+                    </div>
+                `;
+            }
         });
     </script>
 </body>
