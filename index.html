@@ -14,9 +14,6 @@
                 <img id="game-logo" src="" alt="MEGA SLOT" class="game-logo">
                 <h1 class="game-title">MEGA SLOT</h1>
             </div>
-            <div class="admin-link">
-                <a href="admin.html" class="admin-btn">管理画面</a>
-            </div>
         </header>
 
         <!-- メインゲームエリア -->
@@ -39,6 +36,16 @@
                                     <div class="symbol">🍒</div>
                                     <div class="symbol">🍋</div>
                                     <div class="symbol">🍊</div>
+                                    <div class="symbol">🍇</div>
+                                    <div class="symbol">⭐</div>
+                                    <div class="symbol">💎</div>
+                                    <div class="symbol">🎰</div>
+                                    <div class="symbol">🍒</div>
+                                    <div class="symbol">🍋</div>
+                                    <div class="symbol">🍊</div>
+                                    <div class="symbol">🍇</div>
+                                    <div class="symbol">⭐</div>
+                                    <div class="symbol">💎</div>
                                 </div>
                             </div>
                             <div class="reel" id="reel2">
@@ -53,6 +60,16 @@
                                     <div class="symbol">🍋</div>
                                     <div class="symbol">🍊</div>
                                     <div class="symbol">🍇</div>
+                                    <div class="symbol">⭐</div>
+                                    <div class="symbol">💎</div>
+                                    <div class="symbol">🎰</div>
+                                    <div class="symbol">🍒</div>
+                                    <div class="symbol">🍋</div>
+                                    <div class="symbol">🍊</div>
+                                    <div class="symbol">🍇</div>
+                                    <div class="symbol">⭐</div>
+                                    <div class="symbol">💎</div>
+                                    <div class="symbol">🎰</div>
                                 </div>
                             </div>
                             <div class="reel" id="reel3">
@@ -67,6 +84,16 @@
                                     <div class="symbol">🍊</div>
                                     <div class="symbol">🍇</div>
                                     <div class="symbol">⭐</div>
+                                    <div class="symbol">💎</div>
+                                    <div class="symbol">🎰</div>
+                                    <div class="symbol">🍒</div>
+                                    <div class="symbol">🍋</div>
+                                    <div class="symbol">🍊</div>
+                                    <div class="symbol">🍇</div>
+                                    <div class="symbol">⭐</div>
+                                    <div class="symbol">💎</div>
+                                    <div class="symbol">🎰</div>
+                                    <div class="symbol">🍒</div>
                                 </div>
                             </div>
                         </div>
@@ -113,16 +140,12 @@
             </div>
         </main>
 
-        <!-- フッター -->
-        <footer class="game-footer">
-            <div class="pattern-info">
-                <span>現在のパターン: </span>
-                <span id="current-pattern">デフォルト</span>
+        <!-- ブラックアウト演出オーバーレイ -->
+        <div class="blackout-overlay" id="blackout-overlay">
+            <div class="blackout-content">
+                <div class="blackout-text">準備中...</div>
             </div>
-            <div class="test-mode-indicator" id="test-mode" style="display: none;">
-                <span>🧪 テストモード</span>
-            </div>
-        </footer>
+        </div>
 
         <!-- ジャックポット演出オーバーレイ -->
         <div class="jackpot-overlay" id="jackpot-overlay">
@@ -142,6 +165,11 @@
                 <div class="loading-spinner"></div>
                 <p>スピン中...</p>
             </div>
+        </div>
+
+        <!-- 回数制限表示 -->
+        <div class="spin-counter" id="spin-counter" style="display: none;">
+            <span>残り回数: <span id="remaining-spins">0</span></span>
         </div>
     </div>
 
