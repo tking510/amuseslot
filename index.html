@@ -265,7 +265,7 @@
     </div>
 
     <script src="./game-manager.js" defer></script>
-    <script>
+    <script defer> <!-- ここに defer を追加しました -->
         // ゲーム設定
         const reelCount = 3;
         let isSpinning = false;
@@ -388,4 +388,101 @@
             
             setTimeout(() => {
                 document.body.removeChild(effect);
-            },
+            }, 500);
+        }
+
+        // 結果表示
+        function displayResult(result, finalSymbols) {
+            const resultDisplay = document.getElementById('resultDisplay');
+            
+            if (result !== 'lose') {
+                const pattern = gameManager.getCurrentConfig().winPatterns[result];
+                const code = generateCode(result);
+                
+                if (result === 'jackpot') {
+                    showJackpotEffect();
+                }
+                
+                resultDisplay.innerHTML = `
+                    <div class="win-message">${pattern.message}</div>
+                    <div class="code-display">コード: ${code}</div>
+                `;
+                
+                // 統計を更新
+                gameManager.updateStatistics(result, code);
+            } else {
+                resultDisplay.innerHTML = `
+                    <div style="color: #ccc; font-size: 1.2em;">
+                        残念！もう一度チャレンジ！
+                    </div>
+                `;
+                
+                // 統計を更新
+                gameManager.updateStatistics(result, null); // 負けの場合はコードなし
+            }
+            
+            // 設定を保存
+            gameManager.saveConfig();
+        }
+
+        // メインのスピン関数
+        async function spin() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const spinButton = document.getElementById('spinButton');
+            spinButton.disabled = true;
+            spinButton.textContent = '🎲 SPINNING... 🎲';
+            
+            // 結果を事前に決定
+            const result = determineResult();
+            const finalSymbols = setResultSymbols(result);
+            
+            // 結果表示をクリア
+            document.getElementById('resultDisplay').innerHTML = '';
+            
+            // 各リールを順番にアニメーション
+            const animationPromises = [];
+            const currentConfig = gameManager.getCurrentConfig();
+            const spinDuration = currentConfig.gameSettings.spinDuration || 2000;
+            const reelStopDelay = currentConfig.gameSettings.reelStopDelay || 500;
+
+            for (let i = 0; i < reelCount; i++) {
+                const duration = spinDuration + (i * reelStopDelay); // 段階的に停止
+                animationPromises.push(
+                    animateReel(i + 1, finalSymbols[i], duration)
+                );
+            }
+            
+            // すべてのアニメーションが完了するまで待機
+            await Promise.all(animationPromises);
+            
+            // 結果表示
+            setTimeout(() => {
+                displayResult(result, finalSymbols);
+                
+                // ボタンを再有効化
+                spinButton.disabled = false;
+                spinButton.textContent = '🎲 SPIN 🎲';
+                isSpinning = false;
+            }, 500);
+        }
+
+        // 確率設定を外部から変更する関数 (管理画面用)
+        function updateProbabilities(newProbabilities) {
+            gameManager.updateProbabilities(newProbabilities);
+        }
+
+        // 統計情報を取得する関数 (管理画面用)
+        function getStatistics() {
+            return gameManager.getStatistics();
+        }
+
+        // DOMContentLoadedで初期化処理を呼び出す
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeReels();
+            console.log("ゲームが初期化されました。");
+        });
+    </script>
+</body>
+</html>
