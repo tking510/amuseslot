@@ -3,6 +3,7 @@
 class MegaSlotAdmin {
     constructor() {
         this.currentEditingPattern = null;
+        this.generatedUrls = [];
         this.init();
     }
 
@@ -77,7 +78,12 @@ class MegaSlotAdmin {
         });
 
         document.getElementById('generate-url-btn')?.addEventListener('click', () => {
-            this.generateCustomURL();
+            this.generateCustomURLs();
+        });
+
+        // URL一覧エクスポート
+        document.getElementById('export-urls-btn')?.addEventListener('click', () => {
+            this.exportUrls();
         });
     }
 
@@ -450,9 +456,8 @@ class MegaSlotAdmin {
 
     saveLogo() {
         const preview = document.getElementById('logo-preview');
-        
-        if (!preview || !preview.src || preview.src === window.location.href) {
-            this.showAlert('ロゴ画像を選択してください', 'error');
+        if (!preview || !preview.src) {
+            this.showAlert('ロゴを選択してください', 'error');
             return;
         }
 
@@ -466,15 +471,9 @@ class MegaSlotAdmin {
         localStorage.removeItem('gameLogo');
         const preview = document.getElementById('logo-preview');
         if (preview) {
-            preview.style.display = 'none';
             preview.src = '';
+            preview.style.display = 'none';
         }
-        
-        const upload = document.getElementById('logo-upload');
-        if (upload) {
-            upload.value = '';
-        }
-
         this.showAlert('ロゴを削除しました');
     }
 
@@ -489,7 +488,7 @@ class MegaSlotAdmin {
         }
     }
 
-    // プレビュー機能
+    // プレビュー・URL生成
     updatePreviewPatternSelect() {
         const patterns = JSON.parse(localStorage.getItem('slotPatterns') || '[]');
         const select = document.getElementById('preview-pattern-select');
@@ -512,37 +511,124 @@ class MegaSlotAdmin {
 
         if (!select || !normalLink || !testLink) return;
 
-        const selectedPattern = select.value;
+        const selectedPatternId = select.value;
+        const encodedPattern = this.encodePattern(selectedPatternId);
         const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
 
-        normalLink.href = selectedPattern ? `${baseUrl}?pattern=${selectedPattern}` : baseUrl;
-        testLink.href = selectedPattern ? `${baseUrl}?pattern=${selectedPattern}&test=true` : `${baseUrl}?test=true`;
+        normalLink.href = `${baseUrl}?p=${encodedPattern}`;
+        testLink.href = `${baseUrl}?p=${encodedPattern}&test=true`;
     }
 
-    generateCustomURL() {
-        const customName = document.getElementById('custom-url-name').value.trim();
-        const select = document.getElementById('preview-pattern-select');
-        
-        if (!customName) {
-            this.showAlert('カスタムURL名を入力してください', 'error');
+    generateCustomURLs() {
+        const urlName = document.getElementById('custom-url-name').value.trim();
+        const spinLimit = parseInt(document.getElementById('spin-limit').value);
+        const urlCount = parseInt(document.getElementById('url-count').value) || 1;
+        const selectedPatternId = document.getElementById('preview-pattern-select').value;
+
+        if (!urlName) {
+            this.showAlert('URL名を入力してください', 'error');
             return;
         }
 
-        const selectedPattern = select?.value;
-        const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-        const customUrl = selectedPattern ? 
-            `${baseUrl}?pattern=${selectedPattern}&name=${encodeURIComponent(customName)}` : 
-            `${baseUrl}?name=${encodeURIComponent(customName)}`;
-
-        const resultDiv = document.getElementById('generated-url');
-        if (resultDiv) {
-            resultDiv.innerHTML = `
-                <strong>生成されたURL:</strong><br>
-                <a href="${customUrl}" target="_blank">${customUrl}</a>
-            `;
+        if (!spinLimit || spinLimit < 1) {
+            this.showAlert('有効な回転回数制限を入力してください', 'error');
+            return;
         }
 
-        this.showAlert('カスタムURLを生成しました');
+        const encodedPattern = this.encodePattern(selectedPatternId);
+        const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+        
+        this.generatedUrls = [];
+        
+        for (let i = 0; i < urlCount; i++) {
+            const urlId = this.generateUrlId();
+            const url = `${baseUrl}?p=${encodedPattern}&limit=${spinLimit}&id=${urlId}`;
+            
+            this.generatedUrls.push({
+                id: urlId,
+                name: urlCount > 1 ? `${urlName}_${i + 1}` : urlName,
+                url: url,
+                limit: spinLimit,
+                pattern: selectedPatternId,
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        this.displayGeneratedUrls();
+        this.showAlert(`${urlCount}個のURLを生成しました`);
+    }
+
+    generateUrlId() {
+        return Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
+
+    displayGeneratedUrls() {
+        const container = document.getElementById('generated-urls');
+        const exportBtn = document.getElementById('export-urls-btn');
+
+        if (!container) return;
+
+        if (this.generatedUrls.length === 0) {
+            container.innerHTML = '';
+            if (exportBtn) exportBtn.style.display = 'none';
+            return;
+        }
+
+        container.innerHTML = `
+            <h4>生成されたURL (${this.generatedUrls.length}個)</h4>
+            <div class="url-list">
+                ${this.generatedUrls.map(urlData => `
+                    <div class="url-item">
+                        <div class="url-info">
+                            <div class="url-name">${urlData.name}</div>
+                            <div class="url-details">ID: ${urlData.id} | 制限: ${urlData.limit}回</div>
+                            <div class="url-link">
+                                <input type="text" value="${urlData.url}" readonly onclick="this.select()">
+                                <button onclick="navigator.clipboard.writeText('${urlData.url}').then(() => admin.showAlert('URLをコピーしました'))">コピー</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        if (exportBtn) exportBtn.style.display = 'inline-block';
+    }
+
+    exportUrls() {
+        if (this.generatedUrls.length === 0) {
+            this.showAlert('エクスポートするURLがありません', 'warning');
+            return;
+        }
+
+        const csv = [
+            ['URL名', 'URL ID', 'URL', '回転制限', 'パターン', '作成日時'],
+            ...this.generatedUrls.map(urlData => [
+                urlData.name,
+                urlData.id,
+                urlData.url,
+                urlData.limit,
+                urlData.pattern,
+                new Date(urlData.createdAt).toLocaleString('ja-JP')
+            ])
+        ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `slot_urls_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+
+        this.showAlert('URL一覧をエクスポートしました');
+    }
+
+    // パターンエンコード/デコード
+    encodePattern(patternId) {
+        return btoa(patternId).replace(/[+=]/g, '');
+    }
+
+    decodePattern(encoded) {
+        return atob(encoded);
     }
 }
 
@@ -551,8 +637,6 @@ let admin;
 
 // ページ読み込み時に管理画面初期化
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('.admin-container')) {
-        admin = new MegaSlotAdmin();
-    }
+    admin = new MegaSlotAdmin();
 });
 
