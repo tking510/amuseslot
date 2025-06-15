@@ -237,11 +237,8 @@ class MegaSlotGame {
         this.startReelAnimation();
 
         // 演出の判定と実行
-        if (result.type === 'secret') {
-            // シークレットは必ずブラックアウト演出
-            await this.showBlackoutEffect();
-        } else if (result.type !== 'lose') {
-            // シークレット以外の当たりは50%の確率でカットイン演出
+        if (result.type !== 'lose') {
+            // 当たりは50%の確率でカットイン演出
             if (Math.random() < 0.5) {
                 await this.showCutinEffect(result.type);
             }
@@ -322,6 +319,7 @@ class MegaSlotGame {
         if (!overlay || !textElement) return;
 
         const cutinTexts = {
+            secret: 'secret!?',
             jackpot: '特大チャンス!?',
             bigwin: '大チャンス!?',
             smallwin: 'チャンス!?'
