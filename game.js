@@ -3,12 +3,23 @@
 class MegaSlotGame {
     constructor() {
         this.symbols = ['🍒', '🍋', '🍊', '🍇', '⭐', '💎', '🎰'];
+        this.symbolValues = {
+            '🎰': 7,  // 最強（シークレット・ジャックポット）
+            '💎': 6,  // ビッグウィン
+            '⭐': 5,  // スモールウィン
+            '🍇': 4,
+            '🍊': 3,
+            '🍋': 2,
+            '🍒': 1   // 最弱
+        };
         this.reels = [];
         this.isSpinning = false;
         this.testMode = false;
         this.testSequence = ['secret', 'jackpot', 'bigwin', 'smallwin', 'lose'];
         this.testIndex = 0;
         this.currentPattern = null;
+        this.maxSpins = null;
+        this.remainingSpins = null;
         
         this.init();
     }
@@ -17,6 +28,7 @@ class MegaSlotGame {
         this.loadGameSettings();
         this.setupEventListeners();
         this.checkTestMode();
+        this.checkSpinLimit();
         this.updateUI();
     }
 
@@ -88,65 +100,88 @@ class MegaSlotGame {
         if (spinBtn) {
             spinBtn.addEventListener('click', () => this.spin());
         }
-
-        // 確率入力の自動計算
-        const probInputs = ['prob-secret', 'prob-jackpot', 'prob-bigwin', 'prob-smallwin'];
-        probInputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                input.addEventListener('input', () => this.calculateLoseProbability());
-            }
-        });
     }
 
     // テストモードの確認
     checkTestMode() {
         const urlParams = new URLSearchParams(window.location.search);
         this.testMode = urlParams.get('test') === 'true';
-        
-        if (this.testMode) {
-            const testIndicator = document.getElementById('test-mode');
-            if (testIndicator) {
-                testIndicator.style.display = 'block';
-            }
-        }
 
-        // パターン指定の確認
-        const patternParam = urlParams.get('pattern');
-        if (patternParam) {
-            const patterns = JSON.parse(localStorage.getItem('slotPatterns') || '[]');
-            const pattern = patterns.find(p => p.id === patternParam);
-            if (pattern) {
-                this.currentPattern = pattern;
+        // パターン指定の確認（暗号化されたパラメータ）
+        const encodedPattern = urlParams.get('p');
+        if (encodedPattern) {
+            try {
+                const patternId = this.decodePattern(encodedPattern);
+                const patterns = JSON.parse(localStorage.getItem('slotPatterns') || '[]');
+                const pattern = patterns.find(p => p.id === patternId);
+                if (pattern) {
+                    this.currentPattern = pattern;
+                }
+            } catch (e) {
+                console.warn('Invalid pattern parameter');
             }
         }
     }
 
+    // 回数制限の確認
+    checkSpinLimit() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const maxSpins = urlParams.get('limit');
+        
+        if (maxSpins && !isNaN(maxSpins)) {
+            this.maxSpins = parseInt(maxSpins);
+            this.remainingSpins = this.maxSpins;
+            
+            const counter = document.getElementById('spin-counter');
+            const remainingElement = document.getElementById('remaining-spins');
+            
+            if (counter && remainingElement) {
+                counter.style.display = 'block';
+                remainingElement.textContent = this.remainingSpins;
+            }
+        }
+    }
+
+    // パターンエンコード/デコード
+    encodePattern(patternId) {
+        return btoa(patternId).replace(/[+=]/g, '');
+    }
+
+    decodePattern(encoded) {
+        return atob(encoded);
+    }
+
     // UIの更新
     updateUI() {
-        const currentPatternElement = document.getElementById('current-pattern');
-        if (currentPatternElement && this.currentPattern) {
-            currentPatternElement.textContent = this.currentPattern.name;
-        }
+        // パターン表示は削除済み
     }
 
     // スロット回転
     async spin() {
         if (this.isSpinning) return;
 
+        // 回数制限チェック
+        if (this.maxSpins !== null && this.remainingSpins <= 0) {
+            alert('回転回数の上限に達しました。');
+            return;
+        }
+
         this.isSpinning = true;
         const spinBtn = document.getElementById('spin-btn');
-        const loadingOverlay = document.getElementById('loading-overlay');
         
         if (spinBtn) spinBtn.disabled = true;
-        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+        // 結果を事前に決定
+        const result = this.determineResult();
+
+        // ジャックポットまたはシークレットの場合、ブラックアウト演出
+        if (result.type === 'jackpot' || result.type === 'secret') {
+            await this.showBlackoutEffect();
+        }
 
         // リール回転アニメーション
-        await this.animateReels();
+        await this.animateReels(result);
 
-        // 結果判定
-        const result = this.determineResult();
-        
         // 結果表示
         this.displayResult(result);
 
@@ -156,21 +191,47 @@ class MegaSlotGame {
         // コード履歴追加
         this.addToHistory(result);
 
-        // 特殊演出
+        // 回数制限更新
+        if (this.maxSpins !== null) {
+            this.remainingSpins--;
+            const remainingElement = document.getElementById('remaining-spins');
+            if (remainingElement) {
+                remainingElement.textContent = this.remainingSpins;
+            }
+        }
+
+        // ジャックポット演出
         if (result.type === 'jackpot' || result.type === 'secret') {
             await this.showJackpotEffect();
         }
 
-        if (loadingOverlay) loadingOverlay.style.display = 'none';
         if (spinBtn) spinBtn.disabled = false;
         this.isSpinning = false;
     }
 
-    // リール回転アニメーション
-    async animateReels() {
+    // ブラックアウト演出
+    async showBlackoutEffect() {
+        const overlay = document.getElementById('blackout-overlay');
+        if (!overlay) return;
+
+        overlay.style.display = 'flex';
+        
+        return new Promise(resolve => {
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                resolve();
+            }, 2000);
+        });
+    }
+
+    // リール回転アニメーション（改良版）
+    async animateReels(result) {
         const reels = document.querySelectorAll('.reel-symbols');
-        const duration = 2000; // 2秒間回転
+        const duration = 3000; // 3秒間回転
         const startTime = Date.now();
+
+        // 最終停止位置を計算
+        const finalPositions = this.calculateFinalPositions(result);
 
         return new Promise(resolve => {
             const animate = () => {
@@ -178,19 +239,68 @@ class MegaSlotGame {
                 const progress = Math.min(elapsed / duration, 1);
 
                 reels.forEach((reel, index) => {
-                    const speed = 20 - (progress * 15); // 徐々に減速
-                    const offset = (elapsed * speed / 100) % (reel.children.length * 60);
-                    reel.style.transform = `translateY(-${offset}px)`;
+                    if (progress < 1) {
+                        // 回転中
+                        const speed = 30 - (progress * 25); // 徐々に減速
+                        const offset = (elapsed * speed / 100) % (reel.children.length * 60);
+                        reel.style.transform = `translateY(-${offset}px)`;
+                        reel.style.transition = 'none';
+                    } else {
+                        // 最終位置に停止
+                        reel.style.transform = `translateY(-${finalPositions[index]}px)`;
+                        reel.style.transition = 'transform 0.5s ease-out';
+                    }
                 });
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    resolve();
+                    // 停止後の処理
+                    setTimeout(() => {
+                        reels.forEach(reel => {
+                            reel.style.transition = '';
+                        });
+                        resolve();
+                    }, 500);
                 }
             };
             animate();
         });
+    }
+
+    // 最終停止位置の計算
+    calculateFinalPositions(result) {
+        const positions = [];
+        
+        switch (result.type) {
+            case 'secret':
+            case 'jackpot':
+                // 3つ揃い（🎰）
+                positions.push(6 * 60, 5 * 60, 4 * 60); // 各リールで🎰が中央に来る位置
+                break;
+            case 'bigwin':
+                // 3つ揃い（💎）
+                positions.push(5 * 60, 4 * 60, 3 * 60);
+                break;
+            case 'smallwin':
+                // 2つ揃い（⭐）
+                positions.push(4 * 60, 3 * 60, 1 * 60); // 最初の2つだけ揃う
+                break;
+            default:
+                // ハズレ（バラバラ）
+                positions.push(
+                    Math.floor(Math.random() * 7) * 60,
+                    Math.floor(Math.random() * 7) * 60,
+                    Math.floor(Math.random() * 7) * 60
+                );
+                // 揃わないように調整
+                while (positions[0] === positions[1] || positions[1] === positions[2] || positions[0] === positions[2]) {
+                    positions[2] = Math.floor(Math.random() * 7) * 60;
+                }
+                break;
+        }
+        
+        return positions;
     }
 
     // 結果判定
@@ -274,41 +384,6 @@ class MegaSlotGame {
             resultCode.textContent = result.code || '';
             resultCode.style.display = result.code ? 'block' : 'none';
         }
-
-        // リールの最終位置設定
-        this.setFinalReelPosition(result.type);
-    }
-
-    // リールの最終位置設定
-    setFinalReelPosition(resultType) {
-        const reels = document.querySelectorAll('.reel-symbols');
-        
-        reels.forEach((reel, index) => {
-            let symbolIndex;
-            
-            if (resultType === 'jackpot' || resultType === 'secret') {
-                // 同じシンボルを揃える
-                symbolIndex = 6; // 🎰
-            } else if (resultType === 'bigwin') {
-                symbolIndex = 5; // 💎
-            } else if (resultType === 'smallwin') {
-                symbolIndex = 4; // ⭐
-            } else {
-                // ハズレ: バラバラのシンボル
-                symbolIndex = (index * 2) % this.symbols.length;
-            }
-
-            const offset = symbolIndex * 60;
-            reel.style.transform = `translateY(-${offset}px)`;
-            reel.style.transition = 'transform 0.5s ease-out';
-        });
-
-        // トランジション終了後にリセット
-        setTimeout(() => {
-            reels.forEach(reel => {
-                reel.style.transition = '';
-            });
-        }, 500);
     }
 
     // ジャックポット演出
@@ -358,24 +433,6 @@ class MegaSlotGame {
 
             localStorage.setItem('codeHistory', JSON.stringify(history));
         }
-    }
-
-    // ハズレ確率の自動計算
-    calculateLoseProbability() {
-        const secret = parseFloat(document.getElementById('prob-secret')?.value || 0);
-        const jackpot = parseFloat(document.getElementById('prob-jackpot')?.value || 0);
-        const bigwin = parseFloat(document.getElementById('prob-bigwin')?.value || 0);
-        const smallwin = parseFloat(document.getElementById('prob-smallwin')?.value || 0);
-        
-        const total = secret + jackpot + bigwin + smallwin;
-        const lose = Math.max(0, 100 - total);
-        
-        const loseInput = document.getElementById('prob-lose');
-        if (loseInput) {
-            loseInput.value = lose.toFixed(1);
-        }
-
-        return lose;
     }
 }
 
