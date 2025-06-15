@@ -30,6 +30,65 @@ class MegaSlotGame {
         this.checkTestMode();
         this.checkSpinLimit();
         this.updateUI();
+        this.createCutinOverlay();
+    }
+
+    // カットイン演出用オーバーレイの作成
+    createCutinOverlay() {
+        if (document.getElementById('cutin-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'cutin-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+            animation: cutinFade 0.3s ease;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            text-align: center;
+            color: #fff;
+        `;
+
+        const text = document.createElement('div');
+        text.id = 'cutin-text';
+        text.style.cssText = `
+            font-size: 4rem;
+            font-weight: bold;
+            text-shadow: 0 0 30px #ffd700;
+            animation: cutinPulse 0.8s infinite;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        `;
+
+        content.appendChild(text);
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+
+        // CSS アニメーションを追加
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes cutinFade {
+                from { opacity: 0; transform: scale(0.8); }
+                to { opacity: 1; transform: scale(1); }
+            }
+            @keyframes cutinPulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     // ローカルストレージからゲーム設定を読み込み
@@ -174,13 +233,22 @@ class MegaSlotGame {
         // 結果を事前に決定
         const result = this.determineResult();
 
-        // ジャックポットまたはシークレットの場合、ブラックアウト演出
-        if (result.type === 'jackpot' || result.type === 'secret') {
+        // リール回転開始
+        this.startReelAnimation();
+
+        // 演出の判定と実行
+        if (result.type === 'secret') {
+            // シークレットは必ずブラックアウト演出
             await this.showBlackoutEffect();
+        } else if (result.type !== 'lose') {
+            // シークレット以外の当たりは50%の確率でカットイン演出
+            if (Math.random() < 0.5) {
+                await this.showCutinEffect(result.type);
+            }
         }
 
-        // リール回転アニメーション
-        await this.animateReels(result);
+        // リール停止
+        await this.stopReelAnimation(result);
 
         // 結果表示
         this.displayResult(result);
@@ -209,7 +277,29 @@ class MegaSlotGame {
         this.isSpinning = false;
     }
 
-    // ブラックアウト演出
+    // リール回転開始
+    startReelAnimation() {
+        const reels = document.querySelectorAll('.reel-symbols');
+        reels.forEach(reel => {
+            reel.style.transition = 'none';
+            reel.style.animation = 'reelSpin 0.1s linear infinite';
+        });
+
+        // CSS アニメーションを追加（まだ存在しない場合）
+        if (!document.getElementById('reel-animation-style')) {
+            const style = document.createElement('style');
+            style.id = 'reel-animation-style';
+            style.textContent = `
+                @keyframes reelSpin {
+                    0% { transform: translateY(0); }
+                    100% { transform: translateY(-420px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    // ブラックアウト演出（アナザーゴッドハーデス風）
     async showBlackoutEffect() {
         const overlay = document.getElementById('blackout-overlay');
         if (!overlay) return;
@@ -220,51 +310,52 @@ class MegaSlotGame {
             setTimeout(() => {
                 overlay.style.display = 'none';
                 resolve();
-            }, 2000);
+            }, 2500); // 2.5秒間のブラックアウト
         });
     }
 
-    // リール回転アニメーション（改良版）
-    async animateReels(result) {
-        const reels = document.querySelectorAll('.reel-symbols');
-        const duration = 3000; // 3秒間回転
-        const startTime = Date.now();
+    // カットイン演出
+    async showCutinEffect(type) {
+        const overlay = document.getElementById('cutin-overlay');
+        const textElement = document.getElementById('cutin-text');
+        
+        if (!overlay || !textElement) return;
 
-        // 最終停止位置を計算
+        const cutinTexts = {
+            jackpot: '特大チャンス!?',
+            bigwin: '大チャンス!?',
+            smallwin: 'チャンス!?'
+        };
+
+        textElement.textContent = cutinTexts[type] || 'チャンス!?';
+        overlay.style.display = 'flex';
+        
+        return new Promise(resolve => {
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                resolve();
+            }, 1500); // 1.5秒間のカットイン
+        });
+    }
+
+    // リール停止アニメーション
+    async stopReelAnimation(result) {
+        const reels = document.querySelectorAll('.reel-symbols');
         const finalPositions = this.calculateFinalPositions(result);
 
         return new Promise(resolve => {
-            const animate = () => {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
+            reels.forEach((reel, index) => {
+                reel.style.animation = '';
+                reel.style.transition = 'transform 0.8s ease-out';
+                reel.style.transform = `translateY(-${finalPositions[index]}px)`;
+            });
 
-                reels.forEach((reel, index) => {
-                    if (progress < 1) {
-                        // 回転中
-                        const speed = 30 - (progress * 25); // 徐々に減速
-                        const offset = (elapsed * speed / 100) % (reel.children.length * 60);
-                        reel.style.transform = `translateY(-${offset}px)`;
-                        reel.style.transition = 'none';
-                    } else {
-                        // 最終位置に停止
-                        reel.style.transform = `translateY(-${finalPositions[index]}px)`;
-                        reel.style.transition = 'transform 0.5s ease-out';
-                    }
+            setTimeout(() => {
+                reels.forEach(reel => {
+                    reel.style.transition = '';
                 });
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    // 停止後の処理
-                    setTimeout(() => {
-                        reels.forEach(reel => {
-                            reel.style.transition = '';
-                        });
-                        resolve();
-                    }, 500);
-                }
-            };
-            animate();
+                resolve();
+            }, 800);
         });
     }
 
