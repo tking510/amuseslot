@@ -17,7 +17,7 @@
         radial-gradient(circle at 40% 40%,rgba(255,150,0,.15) 0%,transparent 50%),
         radial-gradient(circle at 60% 80%,rgba(150,255,0,.15) 0%,transparent 50%);
       animation:paintFloat 20s ease-in-out infinite;pointer-events:none;z-index:-1}
-    @keyframes paintFloat{0%,100%{transform:translate(0,0) rotate(0);opacity:.8}25%{transform:translate(20px,-30px) rotate(90deg);opacity:1}50%{transform:translate(-15px,20px) rotate(180deg);opacity:.6}75%{transform:translate(30px,10px) rotate(270deg);opacity:1}}
+    @keyframes paintFloat{0%,100%{transform:translate(0,0) rotate(0);opacity:.8}25%{transform:translate(20px,-30px) rotate(90deg);opacity:1}50%{transform:translate(-15px,20px) rotate(180deg);opacity:.6}75%{transform:translate(30px,10px) rotate(270deg);opacity:1}
     .container{max-width:1200px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
     .header{text-align:center;padding:20px 0}
     .logo{width:120px;height:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.1))}
@@ -68,8 +68,7 @@
       .promotion-text{font-size:1.5rem}
       .apply-button{padding:15px 30px;font-size:1.2rem}
     }
-
-    /* ====== APKダウンロード（Android & APKアイコン付き） ====== */
+    /* ====== APKダウンロード（ロボットアイコンのみ） ====== */
     :root{--neon:#a344ff;--apk-txt:#fff;--apk-sub:#cfc9ff}
     .apk-cta{display:flex;justify-content:center;margin:18px 0 34px}
     .apk-download{
@@ -83,7 +82,6 @@
     .apk-download:hover{transform:translateY(-1px);box-shadow:0 0 22px rgba(163,68,255,.65),0 0 3px rgba(163,68,255,.9),inset 0 0 16px rgba(163,68,255,.25);filter:brightness(1.08)}
     .apk-icons{display:flex;gap:8px;align-items:center}
     .apk-icons svg{width:28px;height:28px;filter:drop-shadow(0 0 6px rgba(141,245,100,.35))}
-    .apk-icons svg.apk-file{filter:none}
     .apk-text{line-height:1}
     .apk-title{font-weight:700;letter-spacing:.02em;font-size:18px}
     .apk-sub{margin-top:2px;font-size:13px;color:var(--apk-sub);letter-spacing:.1em}
@@ -101,32 +99,26 @@
       <img src="https://page.gensparksite.com/v1/base64_upload/b3f51036483afbb9a0efffcfd7241c67" alt="Diamond Secret Club" class="logo">
     </header>
 
-    <<!-- 動画セクション -->
-<section class="video-section">
-    <div class="video-overlay">
+    <!-- 動画セクション -->
+    <section class="video-section">
+      <div class="video-overlay">
         <h1>DiamondSecretClub</h1>
-    </div>
-    <video autoplay muted loop playsinline webkit-playsinline preload="auto" controls>
+      </div>
+      <video autoplay muted loop playsinline webkit-playsinline preload="auto" controls>
         <source src="https://page.gensparksite.com/get_upload_url/a21055606d1a19fa1848badc2feba5380d18ab6b84ccc37aba70fbbe03b853ad/default/57ab67ca-642f-44ec-a7d1-798bfdb50f86" type="video/mp4">
         Your browser does not support the video tag.
-    </video>
-</section>
+      </video>
+    </section>
 
-<!-- ★ APKダウンロードアイコンリンク（追加部分） -->
-<div style="text-align:center; margin:30px 0;">
-    <a href="https://tking510.github.io/amuseslot/apk/app-release.apk" download>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Android_logo_2019.png"
-             alt="Android版APKダウンロード"
-             style="width:150px; height:auto;">
-    </a>
-</div>
-
-          <!-- APKファイルアイコンSVG -->
-          <svg class="apk-file" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="#ffffff" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM13 9V3.5L18.5 9H13z"/>
-            <path fill="#a344ff" d="M7 16h1.2l.2-.6h1.2l.2.6h1.2l-1.3-3.6H8.3L7 16zm1.7-1.4.4-1.2.4 1.2H8.7zM12.2 16h1.1v-1.2l1.1 1.2h1.4l-1.4-1.5 1.3-2.1h-1.2l-.8 1.4-.4-.4v-1h-1.1V16zm4.9 0H18v-3.6h-1.1v1.3l-1.2-1.3h-1.4l1.7 1.8-1.6 1.8h1.3l1.1-1.2v1.2z"/>
+    <!-- ★ APKダウンロード（ロボットアイコンのみ／クリックで即DL） -->
+    <div class="apk-cta">
+      <a class="apk-download" href="https://tking510.github.io/amuseslot/apk/app-release.apk" download>
+        <span class="apk-icons">
+          <!-- Android robot head (SVG) -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#7CFC00" d="M7.1 6.2 5.6 4.1a.6.6 0 1 1 1-.7l1.6 2.4A7.9 7.9 0 0 1 12 5c1.57 0 3.03.45 4.27 1.22l1.6-2.4a.6.6 0 1 1 1 .7l-1.5 2.1A8 8 0 0 1 20 12v3.5a1.5 1.5 0 0 1-3 0V12H7v3.5a1.5 1.5 0 0 1-3 0V12c0-2.3.98-4.38 2.54-5.8zM9.75 9.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5zm4.5 0a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5z"/>
           </svg>
-        </div>
+        </span>
         <div class="apk-text">
           <div class="apk-title">Android版（APK）</div>
           <div class="apk-sub">タップしてダウンロード</div>
@@ -246,11 +238,11 @@
     </section>
   </div>
 
-  <!-- 任意：Gensparkのスクリプト（元ページに合わせて残置） -->
+  <!-- （元ページ互換）Gensparkのスクリプト -->
   <script id="html_badge_script1">
     window.__genspark_remove_badge_link="https://www.genspark.ai/api/html_badge/remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDkW%2F5DNwif3CKRKt3u9t%2BQEbSOh8qwnO6%2BOWDNRDktcXrhKPZ861Vz4qLNwsAluZlsXzo2Si7%2FC8NVpAf4Hb4b9Z07eLr3FezUA9gu6pZpNDyFq4EB0CtiG49nNQeiX6q3c6nS4UKUArOEFkafOClf2PHwarP4l2qNE3yG0fsBE3f1bj2GktYHf7SNE63o2l%2FN0x%2BhPfDeMOFMIWGTLiMJOQ9JMrXjny%2F7EKAU%2FMm45T3JfmS5S5u0llYYtvUM5WXCYH2PKubLW8hNgH8WXpxnVFTAO%2FQKbfaVPBDQvX5NmhN6xaPZQUEgeRjsvLgrcPEYhIPdLUTffGABMaDYbyawg2%2By0YWtTSxkCMmRGagNCQoDgP0U5pshWB%2B8rXtMgunicZnfj5RvjMGMpLInmFP5CQursJyuxWB0Hi7UWselhCvb0UzAeNh8Qr%2BownZDjAnVD98Lf%2F64y2ZR1Z2pu3PeR7KNkgMnCQAgwuTlA7JdHmyOap6%2B9uChiCfJ%2BqJWiXCfAHD7A7Re5%2FY9RlyBBaUfg%3D";
     window.__genspark_locale="ja-JP";
-    window.__genspark_token="To/BnjzloZ3UfQdcSaYfDkW/5DNwif3CKRKt3u9t+QEbSOh8qwnO6+OWDNRDktcXrhKPZ861Vz4qLNwsAluZlsXzo2Si7/C8NVpAf4Hb4b9Z07eLr3FezUA9gu6pZpNDyFq4EB0CtiG49nNQeiX6q3c6nS4UKUArOEFkafOClf2PHwarP4l2qNE3yG0fsBE3f1bj2GktYHf7SNE63o2l/N0x+hPfDeMOFMIWGTLiMJOQ9JMrXjny/7EKAU/Mm45T3JfmS5S5u0llYYtvUM5WXCYH2PKubLW8hNgH8WXpxnVFTAO/QKbfaVPBDQvX5NmhN6xaPZQUEgeRjsvLgrcPEYhIPdLUTffGABMaDYbyawg2+y0YWtTSxkCMmRGagNCQoDgP0U5pshWB+8rXtMgunicZnfj5RvjMGMpLInmFP5CQursJyuxWB0Hi7UWselhCvb0UzAeNh8Qr+ownZDjAnVD98Lf/64y2ZR1Z2pu3PeR7KNkgMnCQAgwuTlA7JdHmyOap6+9uChiCfJ+qJWiXCfAHD7A7Re5/Y9RlyBBaUfg=";
+    window.__genspark_token="To/BnjzloZ3UfQdcSaYfDkW/5DNwif3CKRKt3u9t+QEbSOh8qwnO6+OWDNRDktcXrhKPZ861Vz4qLNwsAluZlsXzo2Si7/C8NVpAf4Hb4b9Z07eLr3FezUA9gu6pZpNDyFq4EB0CtiG49nNQeiX6q3c6nS4UKUArOEFkafOClf2PHwarP4l2qNE3yG0fsBE3f1bj2GktYHf7SNE63o2l/N0x+hPfDeMOFMIWGTLiMJOQ9JMrXjny/7EKAU/Mm45T3JfmS5S5u0llYYtvUM5WXCYH2PKubLW8hNgH8WXpxnVFTAO/QKbfaVPBDQvX5NmhN6xaPZQUEgeRjsvLgrcPEYhIPdLUTffGABMaDYbyawg2+y0YWtTSxkCMmRGagNCQoDgP0U5pshWB+8rXtMgunic";
   </script>
   <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
 </body>
